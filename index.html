@@ -407,10 +407,14 @@
             }
 
             .section {
-                display: block !important;
+                display: none !important;
                 box-shadow: none;
                 padding: 0;
                 margin: 0;
+            }
+
+            .section.active {
+                display: block !important;
             }
 
             .card {
@@ -649,6 +653,14 @@
                 margin-top: 6px;
                 font-size: 0.92em;
                 color: #222;
+            }
+
+            #avaliacao-form > *:not(#avaliacao-print-area) {
+                display: none !important;
+            }
+
+            #avaliacao-print-area {
+                display: block !important;
             }
         }
 
@@ -1401,65 +1413,28 @@
                 </div>
             `;
 
-            const avaliadores = Object.entries(resultadoPorEspecialidade || {}).map(([esp, r]) => {
-                const nome = r.nomeAvaliador || 'Não informado';
-                return `<div class="report-meta__item"><strong>${esp}:</strong> ${nome}</div>`;
-            }).join('');
-
-            const resumoLinhas = Object.entries(resultadoPorEspecialidade || {}).map(([esp, r]) => `
-                <tr>
-                    <td>${esp}</td>
-                    <td style="text-align: center;"><strong>${Number(r.percentagem).toFixed(1)}%</strong></td>
-                    <td style="text-align: center;">${r.pontuacaoTotal} / ${r.pontuacaoMaxima}</td>
-                    <td style="text-align: center;">${r.classificacao}</td>
-                </tr>
-            `).join('');
-
-            const resumoTabela = `
-                <div class="report-section">
-                    <div class="report-section__header">
-                        <div class="report-section__title">Resumo por Especialidade</div>
-                        <div class="report-badges">
-                            <span class="badge"><strong>Data:</strong> ${dataAvaliacao}</span>
-                        </div>
-                    </div>
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>Especialidade</th>
-                                <th style="text-align: center; width: 120px;">Percentual</th>
-                                <th style="text-align: center; width: 160px;">Pontuação</th>
-                                <th style="text-align: center; width: 140px;">Classificação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${resumoLinhas || '<tr><td colspan="4">Sem dados para exibir</td></tr>'}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
             const combinadoHtml = resultadoCombinado ? `
                 <div class="report-summary">
-                    <h3 style="margin-bottom: 8px; text-align: center;">Resultado Combinado (Média)</h3>
+                    <h3 style="margin-bottom: 8px; text-align: center;">Resultado Final</h3>
                     <div class="report-meta" style="justify-content: center;">
+                        <div class="report-meta__item"><strong>Data:</strong> ${dataAvaliacao}</div>
                         <div class="report-meta__item"><strong>Percentual:</strong> ${Number(resultadoCombinado.percentagem).toFixed(1)}%</div>
                         <div class="report-meta__item"><strong>Pontuação:</strong> ${resultadoCombinado.pontuacaoTotal} / ${resultadoCombinado.pontuacaoMaxima}</div>
                         <div class="report-meta__item"><strong>Classificação:</strong> ${resultadoCombinado.classificacao}</div>
                     </div>
                 </div>
-            ` : '';
+            ` : `
+                <div class="report-summary">
+                    <h3 style="margin-bottom: 8px; text-align: center;">Resultado Final</h3>
+                    <div class="report-meta" style="justify-content: center;">
+                        <div class="report-meta__item">Sem dados suficientes para calcular o resultado.</div>
+                    </div>
+                </div>
+            `;
 
             const printContent = `
                 ${gerarPrintHeader('Resultado Final da Avaliação', { avaliado: avaliado.nome })}
                 ${dadosPaciente}
-                <div class="card">
-                    <h3>Avaliadores Responsáveis</h3>
-                    <div class="report-meta" style="justify-content: flex-start;">
-                        ${avaliadores || '<div class="report-meta__item">Informações não disponíveis</div>'}
-                    </div>
-                </div>
-                ${resumoTabela}
                 ${combinadoHtml}
                 <div class="signature-area">
                     <div class="signature-block">
