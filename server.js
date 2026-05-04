@@ -2,9 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
-const { sql } = require('@vercel/postgres');
-const { neon } = require('@neondatabase/serverless')
-const sql = neon(process.env.DATABASE_URL)
 
 let prisma;
 try {
