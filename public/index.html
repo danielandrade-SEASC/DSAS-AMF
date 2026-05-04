@@ -801,7 +801,7 @@
                 loadAvaliados();
             } catch (error) {
                 console.error('Erro ao criar avaliado:', error);
-                alert('Erro ao cadastrar avaliado');
+                alert(`Erro ao cadastrar avaliado: ${error.message}`);
             }
         }
 

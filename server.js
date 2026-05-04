@@ -147,18 +147,30 @@ app.get('/api/health', async (req, res) => {
 
 app.post('/api/avaliados', async (req, res) => {
   const { nome, sexo, idade, cor_raca, diagnostico_medico, tipo_deficiencia, funcoes_corporais } = req.body;
-  if (!nome) return res.status(400).json({ error: 'Nome é obrigatório' });
+  const nomeNormalizado = typeof nome === 'string' ? nome.trim() : '';
+  const idadeNormalizada =
+    idade === undefined || idade === null || idade === ''
+      ? null
+      : Number(idade);
+
+  if (!nomeNormalizado) {
+    return res.status(400).json({ error: 'Nome é obrigatório' });
+  }
+
+  if (idadeNormalizada !== null && Number.isNaN(idadeNormalizada)) {
+    return res.status(400).json({ error: 'Idade inválida' });
+  }
 
   try {
     const avaliado = await prisma.avaliado.create({
       data: {
-        nome,
-        sexo,
-        idade: idade ? parseInt(idade) : null,
-        cor_raca,
-        diagnostico_medico,
-        tipo_deficiencia,
-        funcoes_corporais
+        nome: nomeNormalizado,
+        sexo: sexo || null,
+        idade: idadeNormalizada,
+        cor_raca: cor_raca || null,
+        diagnostico_medico: diagnostico_medico || null,
+        tipo_deficiencia: tipo_deficiencia || null,
+        funcoes_corporais: funcoes_corporais || null
       }
     });
     res.json({ id: avaliado.id, message: 'Avaliado criado com sucesso' });
@@ -167,7 +179,8 @@ app.post('/api/avaliados', async (req, res) => {
     res.status(500).json({ 
       error: 'Erro ao cadastrar avaliado', 
       details: error.message,
-      code: error.code 
+      code: error.code,
+      meta: error.meta || null
     });
   }
 });
