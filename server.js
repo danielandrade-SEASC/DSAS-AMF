@@ -3,6 +3,37 @@ const cors = require('cors');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 
+const databaseUrlSource = process.env.DATABASE_URL
+  ? 'DATABASE_URL'
+  : process.env.POSTGRES_PRISMA_URL
+    ? 'POSTGRES_PRISMA_URL'
+    : process.env.POSTGRES_URL_NON_POOLING
+      ? 'POSTGRES_URL_NON_POOLING'
+      : process.env.POSTGRES_URL
+        ? 'POSTGRES_URL'
+        : null;
+
+const resolvedDatabaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.POSTGRES_URL ||
+  '';
+
+const resolvedDirectUrl =
+  process.env.DIRECT_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.POSTGRES_URL ||
+  '';
+
+if (!process.env.DATABASE_URL && resolvedDatabaseUrl) {
+  process.env.DATABASE_URL = resolvedDatabaseUrl;
+}
+
+if (!process.env.DIRECT_URL && resolvedDirectUrl) {
+  process.env.DIRECT_URL = resolvedDirectUrl;
+}
+
 let prisma;
 try {
   prisma = new PrismaClient();
@@ -98,7 +129,9 @@ app.get('/api/health', async (req, res) => {
       status: 'ok', 
       message: 'Conectado ao banco com sucesso!', 
       pacientes_cadastrados: count,
-      db_url_present: !!process.env.DATABASE_URL
+      db_url_present: !!process.env.DATABASE_URL,
+      direct_url_present: !!process.env.DIRECT_URL,
+      db_url_source: databaseUrlSource
     });
   } catch (error) {
     console.error('Erro de diagnóstico:', error);
@@ -106,7 +139,8 @@ app.get('/api/health', async (req, res) => {
       status: 'error', 
       message: 'Falha na conexão com o banco', 
       details: error.message,
-      code: error.code
+      code: error.code,
+      db_url_present: !!process.env.DATABASE_URL
     });
   }
 });
