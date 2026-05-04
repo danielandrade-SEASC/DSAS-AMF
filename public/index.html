@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IFBR - Índice de Funcionalidade Brasileiro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #764ba2;
+            font-size: 1.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            border: none;
+            background: #f0f0f0;
+            color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .nav-tab:hover {
+            background: #e0e0e0;
+        }
+
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .section {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #764ba2;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #643a91;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f0f0f0;
+        }
+
+        .dominio-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .dominio-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dominio-header:hover {
+            opacity: 0.9;
+        }
+
+        .atividade-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .atividade-nome {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .pontuacao-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pontuacao-btn {
+            padding: 10px 18px;
+            border: 2px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 1.1em;
+            min-width: 50px;
+        }
+
+        .pontuacao-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .pontuacao-btn.selected {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-color: #c0392b;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .resultado-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .resultado-numero {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .resultado-classificacao {
+            font-size: 2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .classificacao-leve { color: #28a745; }
+        .classificacao-moderada { color: #ffc107; }
+        .classificacao-grave { color: #dc3545; }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s;
+        }
+
+        .dominio-resultado {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dominio-nome {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .dominio-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.2em; }
+            .form-grid { grid-template-columns: 1fr; }
+            .nav-tab { min-width: 100px; font-size: 0.9em; padding: 10px; }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .nav-tabs, .actions, .btn, header nav {
+                display: none !important;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 20px;
+            }
+
+            .section {
+                display: block !important;
+                box-shadow: none;
+                padding: 10px;
+                margin: 0;
+            }
+
+            .card {
+                page-break-inside: avoid;
+                border: 1px solid #ddd;
+                margin-bottom: 15px;
+            }
+
+            .resultado-card {
+                page-break-inside: avoid;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .progress-fill {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .dominio-resultado {
+                page-break-inside: avoid;
+            }
+
+            .pontuacao-btn {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            header {
+                margin-bottom: 20px;
+                padding: 15px;
+            }
+
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.3em; color: #333; }
+            h3 { font-size: 1.1em; color: #333; }
+
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #333;
+            }
+
+            .print-header p {
+                margin: 2px 0;
+                font-weight: bold;
+                font-size: 0.9em;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+        }
+
+        .print-header {
+            display: none;
+        }
+
+        .print-only {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>IFBR</h1>
+            <h2>Índice de Funcionalidade Brasileiro</h2>
+            <p class="subtitle">Sistema de Avaliação Biopsicossocial da Pessoa com Deficiência</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('home')">Início</button>
+            <button class="nav-tab" onclick="showSection('novo')">Nova Avaliação</button>
+            <button class="nav-tab" onclick="showSection('avaliar')">Avaliar</button>
+            <button class="nav-tab" onclick="showSection('resultados')">Resultados</button>
+        </nav>
+
+        <section id="home" class="section active">
+            <h2>Bem-vindo ao Sistema IFBR</h2>
+            <div class="card">
+                <h3>Sobre o IFBR</h3>
+                <p>O Índice de Funcionalidade Brasileiro (IFBR) é um instrumento de avaliação biopsicossocial desenvolvido para identificar e classificar o grau de funcionalidade e incapacidade de pessoas com deficiência, em conformidade com a Convenção sobre os Direitos das Pessoas com Deficiência e a Lei Brasileira de Inclusão (Lei 13.146/2015).</p>
+            </div>
+
+            <div class="card">
+                <h3>Domínios Avaliados</h3>
+                <ul>
+                    <li><strong>AAC</strong> - Aprendizagem e Aplicação de Conhecimento (9 atividades)</li>
+                    <li><strong>COM</strong> - Comunicação (8 atividades)</li>
+                    <li><strong>MOB</strong> - Mobilidade (8 atividades)</li>
+                    <li><strong>CP</strong> - Cuidados Pessoais (8 atividades)</li>
+                    <li><strong>VD</strong> - Vida Doméstica (8 atividades)</li>
+                    <li><strong>ETVE</strong> - Educação, Trabalho e Vida Econômica (7 atividades)</li>
+                    <li><strong>RII</strong> - Relações e Interações Interpessoais (9 atividades)</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Escala de Pontuação</h3>
+                <p><strong>0</strong> - Nenhum comprometimento | <strong>1</strong> - Leve | <strong>2</strong> - Moderado | <strong>3</strong> - Grave | <strong>4</strong> - Completp</p>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="showSection('novo')">Iniciar Nova Avaliação</button>
+                <button class="btn btn-secondary" onclick="showSection('avaliar')">Continuar Avaliação</button>
+            </div>
+        </section>
+
+        <section id="novo" class="section">
+            <h2>Novo Paciente</h2>
+            <p>Cadastre os dados do paciente para iniciar a avaliação</p>
+            <div id="form-avaliado">
+                <div class="form-group">
+                    <label for="nome">Nome Completo *</label>
+                    <input type="text" id="nome" required>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sexo">Sexo</label>
+                        <select id="sexo">
+                            <option value="">Selecione</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Feminino</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idade">Idade</label>
+                        <input type="number" id="idade" min="0" max="150">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cor_raca">Cor/Raça</label>
+                        <select id="cor_raca">
+                            <option value="">Selecione</option>
+                            <option value="Branca">Branca</option>
+                            <option value="Preta">Preta</option>
+                            <option value="Parda">Parda</option>
+                            <option value="Amarela">Amarela</option>
+                            <option value="Indígena">Indígena</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipo_deficiencia">Tipo de Deficiência</label>
+                        <select id="tipo_deficiencia">
+                            <option value="">Selecione</option>
+                            <option value="Física">Física</option>
+                            <option value="Auditiva">Auditiva</option>
+                            <option value="Visual">Visual</option>
+                            <option value="Intelectual">Intelectual</option>
+                            <option value="Múltipla">Múltipla</option>
+                            <option value="Outra">Outra</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="diagnostico_medico">Diagnóstico Médico</label>
+                    <textarea id="diagnostico_medico" placeholder="Descreva o diagnóstico médico"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="funcoes_corporais">Funções Corporais Acometidas</label>
+                    <textarea id="funcoes_corporais" placeholder="Liste as funções corporais acometidas"></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="criarAvaliado()">Cadastrar Paciente</button>
+            </div>
+        </section>
+
+        <section id="avaliar" class="section">
+            <h2>Avaliar Paciente</h2>
+            <p>Selecione um paciente para avaliar ou continuar avaliação</p>
+
+            <div id="lista-pacientes">
+                <div class="empty-state">
+                    <h3>Nenhum paciente cadastrado</h3>
+                    <p>Cadastre um novo paciente na aba "Nova Avaliação"</p>
+                </div>
+            </div>
+
+            <div id="selecao-especialidade" style="display: none; margin-top: 20px;">
+                <h3>Selecione a Especialidade</h3>
+                <p>Para: <strong><span id="avaliado-nome"></span></strong></p>
+                <div id="especialidades-avaliadas" class="actions" style="margin-top: 20px;"></div>
+                <div class="actions" style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="voltarSelecaoEspecialidade()">Voltar para Lista</button>
+                </div>
+            </div>
+
+            <div id="avaliacao-form" style="display: none; margin-top: 20px;">
+                <h3>Avaliando: <span id="avaliado-nome-avaliacao"></span></h3>
+                <div class="card" style="background: #e8f5e9; border-left-color: #28a745;">
+                    <h3 style="color: #28a745;">Especialidade: <span id="especialidade-atual"></span></h3>
+                </div>
+                <div class="form-group">
+                    <label for="nome-avaliador">Nome do Avaliador *</label>
+                    <input type="text" id="nome-avaliador" placeholder="Digite seu nome" required>
+                </div>
+                <div id="dominios-container"></div>
+                <div id="avaliacao-print-area"></div>
+                <div class="actions">
+                    <button class="btn btn-secondary no-print" onclick="salvarAvaliacao()">Salvar Avaliação</button>
+                    <button class="btn btn-primary no-print" onclick="imprimirAvaliacaoAtual()">Imprimir Avaliação</button>
+                    <button class="btn btn-secondary no-print" onclick="voltarParaLista()">Cancelar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="resultados" class="section">
+            <h2>Resultados</h2>
+            <div id="resultado-container">
+                <div class="empty-state">
+                    <h3>Selecione um avaliado para ver o resultado</h3>
+                    <p>Acesse a aba "Avaliar" para selecionar um avaliado</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let avaliadoAtual = null;
+        let avaliadoAtualNome = null;
+        let dominiosData = [];
+        let avaliacoes = {};
+        let especialidadesData = [];
+        let especialidadeAtual = null;
+        let resultadoPorEspecialidadeData = null;
+
+        async function loadDominios() {
+            try {
+                const response = await fetch('/api/dominios');
+                dominiosData = await response.json();
+                renderDominiosForm();
+            } catch (error) {
+                console.error('Erro ao carregar domínios:', error);
+            }
+        }
+
+        async function loadEspecialidades() {
+            try {
+                const response = await fetch('/api/especialidades');
+                especialidadesData = await response.json();
+            } catch (error) {
+                console.error('Erro ao carregar especialidades:', error);
+            }
+        }
+
+        async function loadAvaliados() {
+            try {
+                const response = await fetch('/api/avaliados');
+                const avaliados = await response.json();
+                renderListaAvaliados(avaliados);
+            } catch (error) {
+                console.error('Erro ao carregar avaliados:', error);
+            }
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelector(`.nav-tab[onclick="showSection('${sectionId}')"]`).classList.add('active');
+
+            if (sectionId === 'avaliar') {
+                loadAvaliados();
+            }
+        }
+
+        function showAvaliacaoForm(avaliadoId, nome) {
+            especialidadeAtual = null;
+            avaliadoAtual = avaliadoId;
+            avaliadoAtualNome = nome;
+
+            const espSelecionadas = document.getElementById('especialidades-avaliadas');
+            espSelecionadas.innerHTML = '';
+
+            especialidadesData.forEach(esp => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-primary';
+                btn.textContent = `Avaliar como ${esp}`;
+                btn.onclick = () => selecionarEspecialidade(esp);
+                espSelecionadas.appendChild(btn);
+            });
+
+            document.getElementById('avaliado-nome').textContent = nome;
+            document.getElementById('lista-pacientes').style.display = 'none';
+            document.getElementById('selecao-especialidade').style.display = 'block';
+            document.getElementById('avaliacao-form').style.display = 'none';
+
+            showSection('avaliar');
+        }
+
+        async function selecionarEspecialidade(esp) {
+            especialidadeAtual = esp;
+
+            const response = await fetch(`/api/avaliados/${avaliadoAtual}/avaliacoes?especialidade=${esp}`);
+            const avaliacoesExistentes = await response.json();
+
+            avaliacoes = {};
+            let nomeAvaliadorExistente = '';
+
+            if (avaliacoesExistentes.length > 0) {
+                nomeAvaliadorExistente = avaliacoesExistentes[0].nome_avaliador || '';
+                avaliacoesExistentes.forEach(a => {
+                    const key = `${a.dominio}|${a.atividade}`;
+                    avaliacoes[key] = a.pontuacao;
+                });
+            }
+
+            document.getElementById('especialidade-atual').textContent = esp;
+            document.getElementById('nome-avaliador').value = nomeAvaliadorExistente;
+            document.getElementById('avaliado-nome-avaliacao').textContent = avaliadoAtualNome || document.getElementById('avaliado-nome').textContent;
+            document.getElementById('selecao-especialidade').style.display = 'none';
+            document.getElementById('avaliacao-form').style.display = 'block';
+
+            loadDominios();
+        }
+
+        function voltarParaLista() {
+            avaliadoAtual = null;
+            avaliadoAtualNome = null;
+            especialidadeAtual = null;
+            avaliacoes = {};
+
+            document.getElementById('lista-pacientes').style.display = 'block';
+            document.getElementById('selecao-especialidade').style.display = 'none';
+            document.getElementById('avaliacao-form').style.display = 'none';
+            document.getElementById('nome-avaliador').value = '';
+
+            loadAvaliados();
+        }
+
+        function voltarSelecaoEspecialidade() {
+            avaliadoAtual = null;
+            avaliadoAtualNome = null;
+            especialidadeAtual = null;
+
+            document.getElementById('lista-pacientes').style.display = 'block';
+            document.getElementById('selecao-especialidade').style.display = 'none';
+            document.getElementById('avaliacao-form').style.display = 'none';
+            document.getElementById('nome-avaliador').value = '';
+        }
+
+        async function criarAvaliado() {
+            console.log('Iniciando cadastro de avaliado...');
+            const nome = document.getElementById('nome').value.trim();
+            if (!nome) {
+                alert('Nome é obrigatório');
+                return;
+            }
+
+            const data = {
+                nome,
+                sexo: document.getElementById('sexo').value,
+                idade: document.getElementById('idade').value ? parseInt(document.getElementById('idade').value) : null,
+                cor_raca: document.getElementById('cor_raca').value,
+                tipo_deficiencia: document.getElementById('tipo_deficiencia').value,
+                diagnostico_medico: document.getElementById('diagnostico_medico').value,
+                funcoes_corporais: document.getElementById('funcoes_corporais').value
+            };
+
+            try {
+                const response = await fetch('/api/avaliados', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || result.details || 'Erro desconhecido no servidor');
+                }
+
+                alert(`Paciente "${nome}" cadastrado com sucesso!\n\nAgora vá para a aba "Avaliar" para iniciar a avaliação.`);
+
+                document.getElementById('nome').value = '';
+                document.getElementById('sexo').value = '';
+                document.getElementById('idade').value = '';
+                document.getElementById('cor_raca').value = '';
+                document.getElementById('tipo_deficiencia').value = '';
+                document.getElementById('diagnostico_medico').value = '';
+                document.getElementById('funcoes_corporais').value = '';
+
+                loadAvaliados();
+            } catch (error) {
+                console.error('Erro ao criar avaliado:', error);
+                alert('Erro ao cadastrar avaliado');
+            }
+        }
+
+        function getScoreColor(score) {
+            return { bg: '#e74c3c', border: '#c0392b' };
+        }
+
+        function gerarPrintHeader(titulo) {
+            const data = new Date().toLocaleDateString('pt-BR');
+            return `
+                <div class="print-header">
+                    <p>ESTADO DE SANTA CATARINA</p>
+                    <p>SECRETARIA DE ESTADO DA ADMINISTRAÇÃO</p>
+                    <p>DIRETORIA DE SAUDE DO SERVIDOR</p>
+                    <p>COORDENADORIA DE PERICIA MEDICA</p>
+                    <h1 style="margin-top: 15px; font-size: 1.5em;">IFBR - Índice de Funcionalidade Brasileiro</h1>
+                    <h2 style="font-size: 1.2em;">${titulo}</h2>
+                    <p>Data: ${data}</p>
+                </div>
+            `;
+        }
+
+        function formatarPontuacao() {
+            const nomeAvaliador = document.getElementById('nome-avaliador').value || 'Não informado';
+            let html = '';
+            let totalPontos = 0;
+            let totalMaximo = 0;
+
+            dominiosData.forEach(dominio => {
+                let pontuacaoDominio = 0;
+                let atividadesHtml = '';
+
+                dominio.atividades.forEach(atividade => {
+                    const key = `${dominio.codigo}|${atividade}`;
+                    const pontuacao = avaliacoes[key] !== undefined ? avaliacoes[key] : '-';
+                    let pontuacaoStyle = '';
+                    if (typeof pontuacao === 'number') {
+                        pontuacaoDominio += pontuacao;
+                        totalPontos += pontuacao;
+                        const color = getScoreColor(pontuacao);
+                        pontuacaoStyle = `style="background: ${color.bg}; color: white; padding: 5px 15px; border-radius: 5px; font-weight: bold;"`;
+                    }
+                    atividadesHtml += `<tr><td>${atividade}</td><td style="text-align: center;"><span ${pontuacaoStyle}>${pontuacao}</span></td></tr>`;
+                });
+
+                totalMaximo += dominio.atividades.length * 4;
+                const percentDominio = ((pontuacaoDominio / (dominio.atividades.length * 4)) * 100).toFixed(1);
+
+                html += `
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <thead>
+                            <tr style="background: #667eea; color: white;">
+                                <th colspan="2" style="padding: 10px; text-align: left;">${dominio.codigo} - ${dominio.nome}</th>
+                                <th style="padding: 10px; text-align: center;">${pontuacaoDominio}/${dominio.atividades.length * 4}</th>
+                                <th style="padding: 10px; text-align: center;">${percentDominio}%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${atividadesHtml}
+                        </tbody>
+                    </table>
+                `;
+            });
+
+            const percentTotal = ((totalPontos / totalMaximo) * 100).toFixed(1);
+            let classificacao = 'Grave';
+            if (percentTotal >= 70) classificacao = 'Leve';
+            else if (percentTotal >= 40) classificacao = 'Moderada';
+
+            html += `
+                <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 8px;">
+                    <h3>RESUMO DA AVALIAÇÃO - ${especialidadeAtual}</h3>
+                    <p style="font-size: 1.2em;"><strong>Avaliador:</strong> ${nomeAvaliador} - ${especialidadeAtual}</p>
+                    <p style="font-size: 1.2em;"><strong>Pontuação Total:</strong> ${totalPontos} / ${totalMaximo} (${percentTotal}%)</p>
+                    <p style="font-size: 1.2em;"><strong>Classificação:</strong> ${classificacao}</p>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function imprimirAvaliacaoAtual() {
+            const nomeAvaliador = document.getElementById('nome-avaliador').value || 'Não informado';
+            const container = document.getElementById('avaliacao-print-area');
+            container.innerHTML = `
+                ${gerarPrintHeader(`Avaliação ${especialidadeAtual}`)}
+                <div class="card">
+                    <h3>Dados do Avaliado</h3>
+                    <p><strong>Nome:</strong> ${document.getElementById('avaliado-nome').textContent}</p>
+                    <p><strong>Avaliador:</strong> ${nomeAvaliador} (${especialidadeAtual})</p>
+                </div>
+                ${formatarPontuacao()}
+                <div style="margin-top: 30px; padding: 20px; border-top: 1px solid #ccc;">
+                    <p><strong>Avaliador:</strong> ${nomeAvaliador} - ${especialidadeAtual}</p>
+                    <p style="margin-top: 20px;"><strong>Assinatura:</strong> _________________________</p>
+                    <p style="margin-top: 20px;"><strong>Data:</strong> _______________</p>
+                </div>
+            `;
+
+            window.print();
+        }
+
+        function renderDominiosForm() {
+            const container = document.getElementById('dominios-container');
+            container.innerHTML = '';
+
+            dominiosData.forEach(dominio => {
+                const div = document.createElement('div');
+                div.className = 'dominio-section';
+
+                const header = document.createElement('div');
+                header.className = 'dominio-header';
+                header.innerHTML = `<strong>${dominio.codigo}</strong> - ${dominio.nome}`;
+                header.onclick = () => {
+                    const content = div.querySelector('.dominio-content');
+                    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                };
+
+                const content = document.createElement('div');
+                content.className = 'dominio-content';
+
+                dominio.atividades.forEach(atividade => {
+                    const key = `${dominio.codigo}|${atividade}`;
+                    const item = document.createElement('div');
+                    item.className = 'atividade-item';
+
+                    item.innerHTML = `
+                        <div class="atividade-nome">${atividade}</div>
+                        <div class="pontuacao-group">
+                            ${[0,1,2,3,4].map(n => `
+                                <button type="button" class="pontuacao-btn ${avaliacoes[key] === n ? 'selected' : ''}"
+                                        data-key="${key}" data-value="${n}">
+                                    ${n}
+                                </button>
+                            `).join('')}
+                        </div>
+                    `;
+
+                    content.appendChild(item);
+                });
+
+                div.appendChild(header);
+                div.appendChild(content);
+                container.appendChild(div);
+            });
+
+            setupPontuacaoListeners();
+        }
+
+        function setPontuacao(key, value) {
+            avaliacoes[key] = value;
+
+            document.querySelectorAll(`.pontuacao-btn[data-key="${key}"]`).forEach(btn => {
+                const btnValue = parseInt(btn.getAttribute('data-value'));
+                btn.classList.toggle('selected', btnValue === value);
+            });
+        }
+
+        function setupPontuacaoListeners() {
+            document.querySelectorAll('.pontuacao-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const key = this.getAttribute('data-key');
+                    const value = parseInt(this.getAttribute('data-value'));
+                    setPontuacao(key, value);
+                });
+            });
+        }
+
+        async function salvarAvaliacao() {
+            if (!avaliadoAtual || !especialidadeAtual) {
+                alert('Nenhum avaliado ou especialidade selecionada');
+                return;
+            }
+
+            const nomeAvaliador = document.getElementById('nome-avaliador').value.trim();
+            if (!nomeAvaliador) {
+                alert('Por favor, informe o nome do avaliador');
+                return;
+            }
+
+            const promises = [];
+            for (const [key, pontuacao] of Object.entries(avaliacoes)) {
+                const [dominio, atividade] = key.split('|');
+                promises.push(
+                    fetch('/api/avaliacoes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            avaliado_id: avaliadoAtual,
+                            especialidade: especialidadeAtual,
+                            nome_avaliador: nomeAvaliador,
+                            dominio,
+                            atividade,
+                            pontuacao
+                        })
+                    })
+                );
+            }
+
+            try {
+                await Promise.all(promises);
+                alert('Avaliação salva com sucesso!');
+
+                voltarParaLista();
+            } catch (error) {
+                console.error('Erro ao salvar avaliação:', error);
+                alert('Erro ao salvar avaliação');
+            }
+        }
+
+        function renderListaAvaliados(avaliados) {
+            const container = document.getElementById('lista-pacientes');
+
+            if (avaliados.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Nenhum avaliado cadastrado</h3>
+                        <p>Cadastre um novo avaliado para iniciar a avaliação</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Sexo</th>
+                            <th>Idade</th>
+                            <th>Tipo de Deficiência</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${avaliados.map(a => `
+                            <tr>
+                                <td>${a.nome}</td>
+                                <td>${a.sexo || '-'}</td>
+                                <td>${a.idade || '-'}</td>
+                                <td>${a.tipo_deficiencia || '-'}</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="showAvaliacaoForm(${a.id}, '${a.nome}')">Avaliar</button>
+                                    <button class="btn btn-secondary" onclick="verResultado(${a.id})">Ver Resultado</button>
+                                    <button class="btn btn-danger" onclick="excluirAvaliado(${a.id})">Excluir</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        async function verResultado(id) {
+            try {
+                const response = await fetch(`/api/avaliados/${id}/resultado`);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(error.error || 'Erro ao carregar resultado');
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.mensagem && data.mensagem.includes('Nenhuma avaliação')) {
+                    alert(data.mensagem);
+                    return;
+                }
+
+                resultadoPorEspecialidadeData = data.resultadoPorEspecialidade;
+                renderResultado(data);
+                showSection('resultados');
+            } catch (error) {
+                console.error('Erro ao ver resultado:', error);
+                alert('Erro ao carregar resultado');
+            }
+        }
+
+        function renderResultado(data) {
+            const container = document.getElementById('resultado-container');
+            const { avaliado, resultadoCombinado, resultadoPorEspecialidade } = data;
+
+            let html = `
+                <div class="card">
+                    <h3>Dados do Avaliado</h3>
+                    <p><strong>Nome:</strong> ${avaliado.nome}</p>
+                    <p><strong>Sexo:</strong> ${avaliado.sexo || '-'}</p>
+                    <p><strong>Idade:</strong> ${avaliado.idade || '-'}</p>
+                    <p><strong>Tipo de Deficiência:</strong> ${avaliado.tipo_deficiencia || '-'}</p>
+                    <p><strong>Diagnóstico:</strong> ${avaliado.diagnostico_medico || '-'}</p>
+                </div>
+            `;
+
+            Object.entries(resultadoPorEspecialidade).forEach(([esp, resultado]) => {
+                const nomeAvaliador = resultado.nomeAvaliador || 'Não informado';
+                html += `
+                    <div class="resultado-card" style="margin-bottom: 20px;">
+                        <h2>Avaliação ${esp}</h2>
+                        <p style="margin-bottom: 10px; font-size: 1.1em;">Avaliador: <strong>${nomeAvaliador}</strong></p>
+                        <div class="resultado-numero">${resultado.percentagem}%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${resultado.percentagem}%">
+                                ${resultado.pontuacaoTotal} / ${resultado.pontuacaoMaxima}
+                            </div>
+                        </div>
+                        <div class="resultado-classificacao">
+                            Classificação: <strong>${resultado.classificacao}</strong>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (resultadoCombinado) {
+                html += `
+                    <div class="resultado-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                        <h2>Resultado Combinado (Média)</h2>
+                        <div class="resultado-numero">${resultadoCombinado.percentagem}%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${resultadoCombinado.percentagem}%">
+                                ${resultadoCombinado.pontuacaoTotal} / ${resultadoCombinado.pontuacaoMaxima}
+                            </div>
+                        </div>
+                        <div class="resultado-classificacao">
+                            Classificação Final: <strong>${resultadoCombinado.classificacao}</strong>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="actions no-print">
+                    <button class="btn btn-primary" onclick="imprimirResultadoFinal()">Imprimir Resultado Final</button>
+                    <button class="btn btn-secondary" onclick="showSection('avaliar')">Voltar</button>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function imprimirResultadoFinal() {
+            const data = new Date().toLocaleDateString('pt-BR');
+            const resultadoContainer = document.getElementById('resultado-container');
+
+            let nomesAvaliadores = '';
+            if (typeof resultadoPorEspecialidadeData !== 'undefined') {
+                Object.entries(resultadoPorEspecialidadeData).forEach(([esp, resultado]) => {
+                    const nome = resultado.nomeAvaliador || 'Não informado';
+                    nomesAvaliadores += `<p><strong>${esp}:</strong> ${nome}</p>`;
+                });
+            }
+
+            let printContent = `
+                ${gerarPrintHeader('Resultado Final da Avaliação')}
+                <div class="card">
+                    <h3>Avaliadores Responsáveis</h3>
+                    ${nomesAvaliadores || '<p>Informações não disponíveis</p>'}
+                </div>
+                ${resultadoContainer.innerHTML}
+                <div style="margin-top: 30px; padding: 20px; border-top: 2px solid #333;">
+                    <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                        <div>
+                            <p>_________________________________</p>
+                            <p>Assinatura Médico</p>
+                        </div>
+                        <div>
+                            <p>_________________________________</p>
+                            <p>Assinatura Psicólogo / Assistente Social</p>
+                        </div>
+                    </div>
+                    <p style="margin-top: 30px; text-align: center;"><strong>Data da Avaliação:</strong> ${data}</p>
+                </div>
+            `;
+
+            const printWindow = window.open('', '', 'width=800,height=600');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>IFBR - Resultado Final</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+                        .resultado-card { padding: 20px; margin-bottom: 20px; border-radius: 8px; color: white; }
+                        .resultado-card:nth-child(2) { background: #667eea; }
+                        .resultado-card:nth-child(3) { background: #764ba2; }
+                        .resultado-card:nth-child(4) { background: #28a745; }
+                        .resultado-numero { font-size: 3em; font-weight: bold; text-align: center; margin: 15px 0; }
+                        .resultado-classificacao { font-size: 1.5em; text-align: center; }
+                        .progress-bar { width: 100%; height: 25px; background: rgba(255,255,255,0.3); border-radius: 12px; overflow: hidden; margin: 10px 0; }
+                        .progress-fill { height: 100%; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; }
+                        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                        th { background: #667eea; color: white; }
+                        .print-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333; }
+                        .print-header p { margin: 2px 0; font-weight: bold; font-size: 0.9em; }
+                        .print-header h1 { margin: 10px 0 5px 0; color: #333; font-size: 1.4em; }
+                        .print-header h2 { margin: 0 0 10px 0; color: #666; font-size: 1.2em; }
+                        .no-print { display: none; }
+                        @media print { .no-print { display: none !important; } }
+                    </style>
+                </head>
+                <body>${printContent}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+        }
+
+        async function excluirAvaliado(id) {
+            if (!confirm('Tem certeza que deseja excluir este avaliado e todas as suas avaliações?')) {
+                return;
+            }
+
+            try {
+                await fetch(`/api/avaliados/${id}`, { method: 'DELETE' });
+                loadAvaliados();
+            } catch (error) {
+                console.error('Erro ao excluir avaliado:', error);
+                alert('Erro ao excluir avaliado');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDominios();
+            loadEspecialidades();
+            loadAvaliados();
+        });
+    </script>
+</body>
+</html>

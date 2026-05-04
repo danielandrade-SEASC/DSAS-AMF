@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Avaliado {
+  id                 Int         @id @default(autoincrement())
+  nome               String
+  sexo               String?
+  idade              Int?
+  cor_raca           String?
+  diagnostico_medico String?
+  tipo_deficiencia   String?
+  funcoes_corporais  String?
+  created_at         DateTime    @default(now())
+  avaliacoes         Avaliacao[]
+
+  @@map("avaliados")
+}
+
+model Avaliacao {
+  id             Int      @id @default(autoincrement())
+  avaliado_id    Int
+  especialidade  String
+  nome_avaliador String
+  dominio        String
+  atividade      String
+  pontuacao      Int
+  observacao     String?
+  created_at     DateTime @default(now())
+  avaliado       Avaliado @relation(fields: [avaliado_id], references: [id], onDelete: Cascade)
+
+  @@map("avaliacoes")
+}
