@@ -1,0 +1,76 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Avaliado {
+  id                           Int               @id @default(autoincrement())
+  nome                         String
+  nis_nit                      String?
+  sexo                         String?
+  idade                        Int?
+  cor_raca                     String?
+  // Diagnóstico médico (perito)
+  cid_causa                    String?
+  cid_sequela                  String?
+  sem_diagnostico_etiologico   Boolean           @default(false)
+  tipo_impedimento             String?
+  data_inicio_impedimento      String?
+  data_alteracao_impedimento   String?
+  funcoes_corporais            String?
+  historia_clinica             String?
+  historia_social              String?
+  // Identificação da avaliação
+  data_avaliacao               String?
+  local_avaliacao              String?
+  codigo_aps                   String?
+  // Perguntas emblemáticas Fuzzy
+  fuzzy_surdez_antes_6anos     Boolean           @default(false)
+  fuzzy_nao_pode_sozinho       Boolean           @default(false)
+  fuzzy_cadeira_rodas          Boolean           @default(false)
+  fuzzy_cego_ao_nascer         Boolean           @default(false)
+  created_at                   DateTime          @default(now())
+  avaliacoes                   Avaliacao[]
+  sessoes                      AvaliacaoSessao[]
+
+  @@map("avaliados")
+}
+
+model AvaliacaoSessao {
+  id               Int      @id @default(autoincrement())
+  avaliado_id      Int
+  especialidade    String
+  nome_avaliador   String
+  siape            String?
+  quem_informou    String?
+  quem_informou_id String?
+  created_at       DateTime @default(now())
+  avaliado         Avaliado @relation(fields: [avaliado_id], references: [id], onDelete: Cascade)
+
+  @@map("avaliacao_sessoes")
+}
+
+model Avaliacao {
+  id             Int      @id @default(autoincrement())
+  avaliado_id    Int
+  especialidade  String
+  nome_avaliador String
+  dominio        String
+  atividade      String
+  pontuacao      Int
+  barreira_pt    Boolean  @default(false)
+  barreira_amb   Boolean  @default(false)
+  barreira_ar    Boolean  @default(false)
+  barreira_at    Boolean  @default(false)
+  barreira_ssp   Boolean  @default(false)
+  observacao     String?
+  created_at     DateTime @default(now())
+  avaliado       Avaliado @relation(fields: [avaliado_id], references: [id], onDelete: Cascade)
+
+  @@map("avaliacoes")
+}

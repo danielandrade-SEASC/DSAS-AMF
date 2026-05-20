@@ -1,0 +1,24 @@
+{
+  "name": "dsas-amf",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "prisma generate",
+    "deploy": "wrangler deploy",
+    "db:generate": "prisma generate",
+    "db:migrate": "wrangler d1 execute dsas-amf-db --file=d1-migration.sql --remote"
+  },
+  "dependencies": {
+    "@prisma/adapter-d1": "^5.22.0",
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0",
+    "wrangler": "^3.0.0"
+  }
+}
