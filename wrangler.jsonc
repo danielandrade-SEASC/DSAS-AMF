@@ -11,8 +11,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "dsas-amf-db",
-      "database_id": "8a510995-c7ef-475a-b20b-dbe70154528b"
+      "database_name": "dsas",
+      "database_id": "912e66a6-78f6-49d8-8d8b-c76acd174031"
     }
   ]
 }

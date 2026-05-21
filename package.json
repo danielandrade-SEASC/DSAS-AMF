@@ -11,7 +11,7 @@
     "build": "prisma generate",
     "deploy": "wrangler deploy",
     "db:generate": "prisma generate",
-    "db:migrate": "wrangler d1 execute dsas-amf-db --file=d1-migration.sql --remote"
+    "db:migrate": "wrangler d1 execute dsas --file=d1-migration.sql --remote"
   },
   "dependencies": {
     "@prisma/adapter-d1": "^5.22.0",
