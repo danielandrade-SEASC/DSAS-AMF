@@ -192,7 +192,9 @@ export default {
       return env.ASSETS.fetch(request)
     }
 
-    const adapter = new PrismaD1(env.DB)
+   // const adapter = new PrismaD1(env.DB)
+    const adapter = new PrismaD1(env.DB.withSession("first-unconstrained"));
+
     const prisma = new PrismaClient({ adapter })
 
     try {
