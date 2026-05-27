@@ -777,8 +777,138 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="funcoes_corporais">Funções Corporais Acometidas</label>
-                    <textarea id="funcoes_corporais" placeholder="Liste as funções corporais acometidas"></textarea>
+                    <label>Funções Corporais Acometidas <small style="font-weight:normal;color:#666;">(Formulário 02 — a ser preenchido pelo perito médico)</small></label>
+                    <div id="funcoes-corporais-form" style="border:1px solid #ddd;border-radius:6px;padding:12px;background:#fafafa;font-size:0.92em;">
+
+                        <div style="margin-bottom:10px;">
+                            <strong>1. Funções Mentais</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Mentais Globais" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Mentais Globais <small style="color:#555;">(consciência, orientação, intelectuais, psicossociais globais, temperamento, energia, sono)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Mentais Específicas" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Mentais Específicas <small style="color:#555;">(atenção, memória, psicomotoras, emocionais, percepção, pensamento, linguagem, cálculo)</small></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <strong>2. Funções Sensoriais e Dor</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Visão e Funções Relacionadas" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Visão e Funções Relacionadas <small style="color:#555;">(acuidade visual, campo visual, músculos do olho, pálpebra, glândulas lacrimais)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Auditivas" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Auditivas <small style="color:#555;">(detecção, discriminação, localização do som e da fala)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Vestibulares" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Vestibulares <small style="color:#555;">(posição, equilíbrio e movimento)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Dor" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Dor <small style="color:#555;">(generalizada ou localizada)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Sensoriais Adicionais" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Sensoriais Adicionais <small style="color:#555;">(gustativa, olfativa, proprioceptiva, tátil, dor, temperatura)</small></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <strong>3. Funções da Voz e da Fala</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções da Voz e da Fala" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Voz, articulação, fluência e ritmo da fala</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <strong>4. Funções dos Sistemas Cardiovascular, Hematológico, Imunológico e Respiratório</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções do Sistema Cardiovascular" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Sistema Cardiovascular <small style="color:#555;">(coração, vasos sanguíneos, pressão arterial)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções do Sistema Hematológico" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Sistema Hematológico <small style="color:#555;">(produção de sangue, transporte de oxigênio, coagulação)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções do Sistema Imunológico" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Sistema Imunológico <small style="color:#555;">(resposta imunológica, hipersensibilidade, sistema linfático)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções do Sistema Respiratório" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Sistema Respiratório <small style="color:#555;">(respiratórias, músculos respiratórios, tolerância a exercícios)</small></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <strong>5. Funções dos Sistemas Digestivo, Metabólico e Endócrino</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções do Sistema Digestivo" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Sistema Digestivo <small style="color:#555;">(ingestão, deglutição, digestão, assimilação, defecação, manutenção de peso)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções do Metabolismo e Sistema Endócrino" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Metabolismo e Sistema Endócrino <small style="color:#555;">(equilíbrio hídrico, mineral, eletrolítico, termorregulação, glândulas endócrinas)</small></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <strong>6. Funções Geniturinárias e Reprodutivas</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Urinárias" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Urinárias <small style="color:#555;">(filtragem, coleta e excreção de urina)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Genitais e Reprodutivas" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Genitais e Reprodutivas <small style="color:#555;">(ato sexual, menstruação, procriação)</small></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:10px;">
+                            <strong>7. Funções Neuromusculoesqueléticas e relacionadas ao movimento</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções das Articulações e dos Ossos" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Articulações e Ossos <small style="color:#555;">(mobilidade, estabilidade das articulações e ossos)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções Musculares" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções Musculares <small style="color:#555;">(força, tônus e resistência muscular)</small></span>
+                                </label>
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções dos Movimentos" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Funções dos Movimentos <small style="color:#555;">(reflexo motor, movimentos involuntários, controle voluntário, padrão de marcha)</small></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <strong>8. Funções da Pele e Estruturas Relacionadas</strong>
+                            <div style="margin-left:16px;margin-top:4px;">
+                                <label style="display:flex;align-items:flex-start;gap:6px;cursor:pointer;">
+                                    <input type="checkbox" name="funcoes_corporais" value="Funções da Pele" style="margin-top:2px;flex-shrink:0;">
+                                    <span>Pele, pelos e unhas <small style="color:#555;">(protetora, reparadora, sensação relacionada à pele, pelos e unhas)</small></span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
                 <button class="btn btn-primary" onclick="criarAvaliado()">Cadastrar Paciente</button>
@@ -976,7 +1106,10 @@
                 cor_raca: document.getElementById('cor_raca').value,
                 tipo_deficiencia: document.getElementById('tipo_deficiencia').value,
                 diagnostico_medico: document.getElementById('diagnostico_medico').value,
-                funcoes_corporais: document.getElementById('funcoes_corporais').value
+                funcoes_corporais: JSON.stringify(
+                    Array.from(document.querySelectorAll('input[name="funcoes_corporais"]:checked'))
+                        .map(cb => cb.value)
+                )
             };
 
             try {
@@ -1000,7 +1133,7 @@
                 document.getElementById('cor_raca').value = '';
                 document.getElementById('tipo_deficiencia').value = '';
                 document.getElementById('diagnostico_medico').value = '';
-                document.getElementById('funcoes_corporais').value = '';
+                document.querySelectorAll('input[name="funcoes_corporais"]').forEach(cb => cb.checked = false);
 
                 loadAvaliados();
             } catch (error) {

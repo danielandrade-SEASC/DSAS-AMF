@@ -1,6 +1,3 @@
-import { PrismaClient } from '@prisma/client'
-import { PrismaD1 } from '@prisma/adapter-d1'
-
 // ─── Dados oficiais IF-BrA (41 atividades em 7 domínios) ─────────────────────
 
 const especialidades = ['Perito Médico', 'Assistente Social']
@@ -110,7 +107,6 @@ function aplicarFuzzy(avaliado, avaliacoes) {
   for (const tipo of tipos) {
     const codigos = fuzzyDominios[tipo] || []
 
-    // Verifica se pergunta emblemática está ativa para este tipo
     const emblematicoAtivo =
       (tipo === 'Auditiva' && avaliado.fuzzy_surdez_antes_6anos) ||
       ((tipo === 'Intelectual/Cognitiva' || tipo === 'Mental') && avaliado.fuzzy_nao_pode_sozinho) ||
@@ -126,7 +122,6 @@ function aplicarFuzzy(avaliado, avaliacoes) {
       const tem25ou50 = pontuacoes.some(p => p <= 50)
       const todos75 = pontuacoes.every(p => p === 75)
 
-      // Aplica Fuzzy se: emblemático ativo OU tem 25/50 OU tudo 75
       if (emblematicoAtivo || tem25ou50 || todos75) {
         resultado = resultado.map(a =>
           a.dominio === cod ? { ...a, pontuacao: minPontuacao } : a
@@ -170,6 +165,19 @@ function json(data, status = 200) {
   })
 }
 
+// Converte inteiros SQLite (0/1) de volta para booleanos JS
+function parseBools(row) {
+  if (!row) return row
+  return {
+    ...row,
+    sem_diagnostico_etiologico: !!row.sem_diagnostico_etiologico,
+    fuzzy_surdez_antes_6anos:   !!row.fuzzy_surdez_antes_6anos,
+    fuzzy_nao_pode_sozinho:     !!row.fuzzy_nao_pode_sozinho,
+    fuzzy_cadeira_rodas:        !!row.fuzzy_cadeira_rodas,
+    fuzzy_cego_ao_nascer:       !!row.fuzzy_cego_ao_nascer
+  }
+}
+
 // ─── Worker ───────────────────────────────────────────────────────────────────
 
 export default {
@@ -192,10 +200,7 @@ export default {
       return env.ASSETS.fetch(request)
     }
 
-   // const adapter = new PrismaD1(env.DB)
-    const adapter = new PrismaD1(env.DB.withSession("first-unconstrained"));
-
-    const prisma = new PrismaClient({ adapter })
+    const db = env.DB
 
     try {
       // ── Metadados ────────────────────────────────────────────────────────
@@ -204,14 +209,14 @@ export default {
       if (method === 'GET' && path === '/api/tipos-impedimento') return json(tiposImpedimento)
 
       if (method === 'GET' && path === '/api/health') {
-        const count = await prisma.avaliado.count()
-        return json({ status: 'ok', pacientes_cadastrados: count })
+        const row = await db.prepare('SELECT COUNT(*) as count FROM avaliados').first()
+        return json({ status: 'ok', pacientes_cadastrados: row.count })
       }
 
       // ── Avaliados ─────────────────────────────────────────────────────────
       if (method === 'GET' && path === '/api/avaliados') {
-        const avaliados = await prisma.avaliado.findMany({ orderBy: { created_at: 'desc' } })
-        return json(avaliados)
+        const { results } = await db.prepare('SELECT * FROM avaliados ORDER BY created_at DESC').all()
+        return json(results.map(parseBools))
       }
 
       if (method === 'POST' && path === '/api/avaliados') {
@@ -223,32 +228,38 @@ export default {
           ? null : Number(b.idade)
         if (idade !== null && isNaN(idade)) return json({ error: 'Idade inválida' }, 400)
 
-        const avaliado = await prisma.avaliado.create({
-          data: {
-            nome,
-            nis_nit: b.nis_nit || null,
-            sexo: b.sexo || null,
-            idade,
-            cor_raca: b.cor_raca || null,
-            cid_causa: b.cid_causa || null,
-            cid_sequela: b.cid_sequela || null,
-            sem_diagnostico_etiologico: !!b.sem_diagnostico_etiologico,
-            tipo_impedimento: b.tipo_impedimento || null,
-            data_inicio_impedimento: b.data_inicio_impedimento || null,
-            data_alteracao_impedimento: b.data_alteracao_impedimento || null,
-            funcoes_corporais: b.funcoes_corporais || null,
-            historia_clinica: b.historia_clinica || null,
-            historia_social: b.historia_social || null,
-            data_avaliacao: b.data_avaliacao || null,
-            local_avaliacao: b.local_avaliacao || null,
-            codigo_aps: b.codigo_aps || null,
-            fuzzy_surdez_antes_6anos: !!b.fuzzy_surdez_antes_6anos,
-            fuzzy_nao_pode_sozinho: !!b.fuzzy_nao_pode_sozinho,
-            fuzzy_cadeira_rodas: !!b.fuzzy_cadeira_rodas,
-            fuzzy_cego_ao_nascer: !!b.fuzzy_cego_ao_nascer
-          }
-        })
-        return json({ id: avaliado.id, message: 'Avaliado criado com sucesso' })
+        const result = await db.prepare(`
+          INSERT INTO avaliados (
+            nome, nis_nit, sexo, idade, cor_raca, cid_causa, cid_sequela,
+            sem_diagnostico_etiologico, tipo_impedimento, data_inicio_impedimento,
+            data_alteracao_impedimento, funcoes_corporais, historia_clinica, historia_social,
+            data_avaliacao, local_avaliacao, codigo_aps,
+            fuzzy_surdez_antes_6anos, fuzzy_nao_pode_sozinho, fuzzy_cadeira_rodas, fuzzy_cego_ao_nascer
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          nome,
+          b.nis_nit || null,
+          b.sexo || null,
+          idade,
+          b.cor_raca || null,
+          b.cid_causa || null,
+          b.cid_sequela || null,
+          b.sem_diagnostico_etiologico ? 1 : 0,
+          b.tipo_impedimento || null,
+          b.data_inicio_impedimento || null,
+          b.data_alteracao_impedimento || null,
+          b.funcoes_corporais || null,
+          b.historia_clinica || null,
+          b.historia_social || null,
+          b.data_avaliacao || null,
+          b.local_avaliacao || null,
+          b.codigo_aps || null,
+          b.fuzzy_surdez_antes_6anos ? 1 : 0,
+          b.fuzzy_nao_pode_sozinho ? 1 : 0,
+          b.fuzzy_cadeira_rodas ? 1 : 0,
+          b.fuzzy_cego_ao_nascer ? 1 : 0
+        ).run()
+        return json({ id: result.meta.last_row_id, message: 'Avaliado criado com sucesso' })
       }
 
       // ── Rotas com :id ─────────────────────────────────────────────────────
@@ -258,46 +269,51 @@ export default {
         const subpath = matchId[2] || ''
 
         if (method === 'GET' && subpath === '') {
-          const avaliado = await prisma.avaliado.findUnique({
-            where: { id },
-            include: { sessoes: true }
-          })
+          const avaliado = await db.prepare('SELECT * FROM avaliados WHERE id = ?').bind(id).first()
           if (!avaliado) return json({ error: 'Avaliado não encontrado' }, 404)
-          return json(avaliado)
+          const { results: sessoes } = await db.prepare(
+            'SELECT * FROM avaliacao_sessoes WHERE avaliado_id = ?'
+          ).bind(id).all()
+          return json({ ...parseBools(avaliado), sessoes })
         }
 
         if (method === 'PATCH' && subpath === '') {
           const b = await request.json()
-          const avaliado = await prisma.avaliado.update({
-            where: { id },
-            data: {
-              nis_nit: b.nis_nit ?? undefined,
-              sexo: b.sexo ?? undefined,
-              idade: b.idade !== undefined ? (b.idade === '' ? null : Number(b.idade)) : undefined,
-              cor_raca: b.cor_raca ?? undefined,
-              cid_causa: b.cid_causa ?? undefined,
-              cid_sequela: b.cid_sequela ?? undefined,
-              sem_diagnostico_etiologico: b.sem_diagnostico_etiologico !== undefined ? !!b.sem_diagnostico_etiologico : undefined,
-              tipo_impedimento: b.tipo_impedimento ?? undefined,
-              data_inicio_impedimento: b.data_inicio_impedimento ?? undefined,
-              data_alteracao_impedimento: b.data_alteracao_impedimento ?? undefined,
-              funcoes_corporais: b.funcoes_corporais ?? undefined,
-              historia_clinica: b.historia_clinica ?? undefined,
-              historia_social: b.historia_social ?? undefined,
-              data_avaliacao: b.data_avaliacao ?? undefined,
-              local_avaliacao: b.local_avaliacao ?? undefined,
-              codigo_aps: b.codigo_aps ?? undefined,
-              fuzzy_surdez_antes_6anos: b.fuzzy_surdez_antes_6anos !== undefined ? !!b.fuzzy_surdez_antes_6anos : undefined,
-              fuzzy_nao_pode_sozinho: b.fuzzy_nao_pode_sozinho !== undefined ? !!b.fuzzy_nao_pode_sozinho : undefined,
-              fuzzy_cadeira_rodas: b.fuzzy_cadeira_rodas !== undefined ? !!b.fuzzy_cadeira_rodas : undefined,
-              fuzzy_cego_ao_nascer: b.fuzzy_cego_ao_nascer !== undefined ? !!b.fuzzy_cego_ao_nascer : undefined
-            }
-          })
-          return json(avaliado)
+          const sets = []
+          const vals = []
+
+          const textFields = [
+            'nis_nit', 'sexo', 'cor_raca', 'cid_causa', 'cid_sequela', 'tipo_impedimento',
+            'data_inicio_impedimento', 'data_alteracao_impedimento', 'funcoes_corporais',
+            'historia_clinica', 'historia_social', 'data_avaliacao', 'local_avaliacao', 'codigo_aps'
+          ]
+          for (const f of textFields) {
+            if (b[f] !== undefined) { sets.push(`${f} = ?`); vals.push(b[f] ?? null) }
+          }
+
+          if (b.idade !== undefined) {
+            sets.push('idade = ?')
+            vals.push(b.idade === '' ? null : Number(b.idade))
+          }
+
+          const boolFields = [
+            'sem_diagnostico_etiologico', 'fuzzy_surdez_antes_6anos',
+            'fuzzy_nao_pode_sozinho', 'fuzzy_cadeira_rodas', 'fuzzy_cego_ao_nascer'
+          ]
+          for (const f of boolFields) {
+            if (b[f] !== undefined) { sets.push(`${f} = ?`); vals.push(b[f] ? 1 : 0) }
+          }
+
+          if (sets.length === 0) return json({ error: 'Nenhum campo para atualizar' }, 400)
+
+          vals.push(id)
+          await db.prepare(`UPDATE avaliados SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run()
+          const avaliado = await db.prepare('SELECT * FROM avaliados WHERE id = ?').bind(id).first()
+          return json(parseBools(avaliado))
         }
 
         if (method === 'DELETE' && subpath === '') {
-          await prisma.avaliado.delete({ where: { id } })
+          await db.prepare('DELETE FROM avaliados WHERE id = ?').bind(id).run()
           return json({ message: 'Avaliado removido com sucesso' })
         }
 
@@ -307,43 +323,44 @@ export default {
           if (!b.especialidade || !b.nome_avaliador) {
             return json({ error: 'Especialidade e nome do avaliador são obrigatórios' }, 400)
           }
-          const existing = await prisma.avaliacaoSessao.findFirst({
-            where: { avaliado_id: id, especialidade: b.especialidade }
-          })
-          const data = {
-            nome_avaliador: b.nome_avaliador,
-            siape: b.siape || null,
-            quem_informou: b.quem_informou || null,
-            quem_informou_id: b.quem_informou_id || null
+          const existing = await db.prepare(
+            'SELECT id FROM avaliacao_sessoes WHERE avaliado_id = ? AND especialidade = ?'
+          ).bind(id, b.especialidade).first()
+
+          if (existing) {
+            await db.prepare(
+              'UPDATE avaliacao_sessoes SET nome_avaliador = ?, siape = ?, quem_informou = ?, quem_informou_id = ? WHERE id = ?'
+            ).bind(b.nome_avaliador, b.siape || null, b.quem_informou || null, b.quem_informou_id || null, existing.id).run()
+            return json({ id: existing.id, message: 'Sessão atualizada' })
           }
-          const sessao = existing
-            ? await prisma.avaliacaoSessao.update({ where: { id: existing.id }, data })
-            : await prisma.avaliacaoSessao.create({ data: { avaliado_id: id, especialidade: b.especialidade, ...data } })
-          return json({ id: sessao.id, message: existing ? 'Sessão atualizada' : 'Sessão registrada' })
+
+          const result = await db.prepare(
+            'INSERT INTO avaliacao_sessoes (avaliado_id, especialidade, nome_avaliador, siape, quem_informou, quem_informou_id) VALUES (?, ?, ?, ?, ?, ?)'
+          ).bind(id, b.especialidade, b.nome_avaliador, b.siape || null, b.quem_informou || null, b.quem_informou_id || null).run()
+          return json({ id: result.meta.last_row_id, message: 'Sessão registrada' })
         }
 
         // ── Avaliações ─────────────────────────────────────────────────────
         if (method === 'GET' && subpath === '/avaliacoes') {
           const especialidade = url.searchParams.get('especialidade')
-          const where = { avaliado_id: id }
-          if (especialidade) where.especialidade = especialidade
-          const avaliacoes = await prisma.avaliacao.findMany({
-            where,
-            orderBy: [{ especialidade: 'asc' }, { dominio: 'asc' }, { atividade: 'asc' }]
-          })
-          return json(avaliacoes)
+          let query = 'SELECT * FROM avaliacoes WHERE avaliado_id = ?'
+          const params = [id]
+          if (especialidade) { query += ' AND especialidade = ?'; params.push(especialidade) }
+          query += ' ORDER BY especialidade ASC, dominio ASC, atividade ASC'
+          const { results } = await db.prepare(query).bind(...params).all()
+          return json(results.map(parseBools))
         }
 
         if (method === 'POST' && subpath === '/avaliacoes') {
           const b = await request.json()
           const { especialidade, nome_avaliador, dominio, atividade, pontuacao, observacao } = b
-          const barreiras = {
-            barreira_pt: !!b.barreira_pt,
-            barreira_amb: !!b.barreira_amb,
-            barreira_ar: !!b.barreira_ar,
-            barreira_at: !!b.barreira_at,
-            barreira_ssp: !!b.barreira_ssp
-          }
+          const barreiras = [
+            b.barreira_pt ? 1 : 0,
+            b.barreira_amb ? 1 : 0,
+            b.barreira_ar ? 1 : 0,
+            b.barreira_at ? 1 : 0,
+            b.barreira_ssp ? 1 : 0
+          ]
 
           if (!especialidade || !nome_avaliador || !dominio || !atividade || pontuacao === undefined) {
             return json({ error: 'Campos obrigatórios faltando' }, 400)
@@ -352,44 +369,41 @@ export default {
             return json({ error: 'Pontuação deve ser 25, 50, 75 ou 100' }, 400)
           }
 
-          const existing = await prisma.avaliacao.findFirst({
-            where: { avaliado_id: id, especialidade, dominio, atividade }
-          })
+          const existing = await db.prepare(
+            'SELECT id FROM avaliacoes WHERE avaliado_id = ? AND especialidade = ? AND dominio = ? AND atividade = ?'
+          ).bind(id, especialidade, dominio, atividade).first()
 
           if (existing) {
-            const updated = await prisma.avaliacao.update({
-              where: { id: existing.id },
-              data: { nome_avaliador, pontuacao: Number(pontuacao), observacao: observacao || null, ...barreiras }
-            })
-            return json({ id: updated.id, message: 'Avaliação atualizada' })
+            await db.prepare(
+              'UPDATE avaliacoes SET nome_avaliador = ?, pontuacao = ?, observacao = ?, barreira_pt = ?, barreira_amb = ?, barreira_ar = ?, barreira_at = ?, barreira_ssp = ? WHERE id = ?'
+            ).bind(nome_avaliador, Number(pontuacao), observacao || null, ...barreiras, existing.id).run()
+            return json({ id: existing.id, message: 'Avaliação atualizada' })
           }
 
-          const created = await prisma.avaliacao.create({
-            data: {
-              avaliado_id: id,
-              especialidade,
-              nome_avaliador,
-              dominio,
-              atividade,
-              pontuacao: Number(pontuacao),
-              observacao: observacao || null,
-              ...barreiras
-            }
-          })
-          return json({ id: created.id, message: 'Avaliação salva' })
+          const result = await db.prepare(
+            'INSERT INTO avaliacoes (avaliado_id, especialidade, nome_avaliador, dominio, atividade, pontuacao, observacao, barreira_pt, barreira_amb, barreira_ar, barreira_at, barreira_ssp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          ).bind(id, especialidade, nome_avaliador, dominio, atividade, Number(pontuacao), observacao || null, ...barreiras).run()
+          return json({ id: result.meta.last_row_id, message: 'Avaliação salva' })
         }
 
         // ── Resultado com Fuzzy ────────────────────────────────────────────
         if (method === 'GET' && subpath === '/resultado') {
-          const avaliado = await prisma.avaliado.findUnique({
-            where: { id },
-            include: { avaliacoes: true, sessoes: true }
-          })
+          const avaliado = await db.prepare('SELECT * FROM avaliados WHERE id = ?').bind(id).first()
           if (!avaliado) return json({ error: 'Avaliado não encontrado' }, 404)
 
-          if (avaliado.avaliacoes.length === 0) {
+          const { results: avaliacoes } = await db.prepare(
+            'SELECT * FROM avaliacoes WHERE avaliado_id = ?'
+          ).bind(id).all()
+          const { results: sessoes } = await db.prepare(
+            'SELECT * FROM avaliacao_sessoes WHERE avaliado_id = ?'
+          ).bind(id).all()
+
+          const avaliadoParsed = parseBools(avaliado)
+          const avaliacoesParsed = avaliacoes.map(parseBools)
+
+          if (avaliacoesParsed.length === 0) {
             return json({
-              avaliado,
+              avaliado: avaliadoParsed,
               resultadoCombinado: null,
               resultadoPorEspecialidade: {},
               mensagem: 'Nenhuma avaliação encontrada'
@@ -400,14 +414,14 @@ export default {
           let pontuacaoTotalCombinada = 0
 
           for (const esp of especialidades) {
-            const avaliacoesEsp = avaliado.avaliacoes.filter(a => a.especialidade === esp)
+            const avaliacoesEsp = avaliacoesParsed.filter(a => a.especialidade === esp)
             if (avaliacoesEsp.length === 0) continue
 
-            const avaliacoesCorrigidas = aplicarFuzzy(avaliado, avaliacoesEsp)
+            const avaliacoesCorrigidas = aplicarFuzzy(avaliadoParsed, avaliacoesEsp)
             const soma = avaliacoesCorrigidas.reduce((s, a) => s + a.pontuacao, 0)
             pontuacaoTotalCombinada += soma
 
-            const sessao = avaliado.sessoes.find(s => s.especialidade === esp)
+            const sessao = sessoes.find(s => s.especialidade === esp)
             resultadoPorEspecialidade[esp] = {
               pontuacaoTotal: soma,
               pontuacaoMaxima: avaliacoesEsp.length * 100,
@@ -424,7 +438,7 @@ export default {
           const pontuacaoMinimaPossivel = totalAtividades * 25 * totalAplicadores
 
           return json({
-            avaliado,
+            avaliado: { ...avaliadoParsed, avaliacoes: avaliacoesParsed, sessoes },
             resultadoPorEspecialidade,
             pontuacaoTotal: pontuacaoTotalCombinada,
             pontuacaoMaxima: pontuacaoMaximaPossivel,
@@ -449,27 +463,26 @@ export default {
         let salvos = 0
         for (const av of avaliacoes) {
           if (![25, 50, 75, 100].includes(Number(av.pontuacao))) continue
-          const existing = await prisma.avaliacao.findFirst({
-            where: { avaliado_id: parseInt(avaliado_id), especialidade, dominio: av.dominio, atividade: av.atividade }
-          })
-          const data = {
-            avaliado_id: parseInt(avaliado_id),
-            especialidade,
-            nome_avaliador,
-            dominio: av.dominio,
-            atividade: av.atividade,
-            pontuacao: Number(av.pontuacao),
-            barreira_pt: !!av.barreira_pt,
-            barreira_amb: !!av.barreira_amb,
-            barreira_ar: !!av.barreira_ar,
-            barreira_at: !!av.barreira_at,
-            barreira_ssp: !!av.barreira_ssp,
-            observacao: av.observacao || null
-          }
+          const aid = parseInt(avaliado_id)
+          const barreiras = [
+            av.barreira_pt ? 1 : 0,
+            av.barreira_amb ? 1 : 0,
+            av.barreira_ar ? 1 : 0,
+            av.barreira_at ? 1 : 0,
+            av.barreira_ssp ? 1 : 0
+          ]
+          const existing = await db.prepare(
+            'SELECT id FROM avaliacoes WHERE avaliado_id = ? AND especialidade = ? AND dominio = ? AND atividade = ?'
+          ).bind(aid, especialidade, av.dominio, av.atividade).first()
+
           if (existing) {
-            await prisma.avaliacao.update({ where: { id: existing.id }, data })
+            await db.prepare(
+              'UPDATE avaliacoes SET nome_avaliador = ?, pontuacao = ?, barreira_pt = ?, barreira_amb = ?, barreira_ar = ?, barreira_at = ?, barreira_ssp = ?, observacao = ? WHERE id = ?'
+            ).bind(nome_avaliador, Number(av.pontuacao), ...barreiras, av.observacao || null, existing.id).run()
           } else {
-            await prisma.avaliacao.create({ data })
+            await db.prepare(
+              'INSERT INTO avaliacoes (avaliado_id, especialidade, nome_avaliador, dominio, atividade, pontuacao, barreira_pt, barreira_amb, barreira_ar, barreira_at, barreira_ssp, observacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            ).bind(aid, especialidade, nome_avaliador, av.dominio, av.atividade, Number(av.pontuacao), ...barreiras, av.observacao || null).run()
           }
           salvos++
         }
