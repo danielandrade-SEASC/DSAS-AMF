@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IF-BrA — Instrumento de Funcionalidade Brasileiro — LC 142/2013</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#1a237e 0%,#4a148c 100%);min-height:100vh;padding:16px}
+.container{max-width:1200px;margin:0 auto}
+header{background:#fff;padding:20px 30px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.15);margin-bottom:16px;text-align:center}
+header h1{color:#1a237e;font-size:1.8em;margin-bottom:4px}
+header h2{color:#4a148c;font-size:1em;font-weight:400}
+header p{color:#666;font-size:.9em;margin-top:4px}
+.nav-tabs{display:flex;background:#fff;padding:8px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:16px;gap:8px;flex-wrap:wrap}
+.nav-tab{flex:1;min-width:120px;padding:10px 16px;border:none;background:#f0f0f0;color:#333;border-radius:6px;cursor:pointer;font-size:.95em;font-weight:500;transition:all .2s}
+.nav-tab:hover{background:#e0e0e0}
+.nav-tab.active{background:#1a237e;color:#fff}
+.section{display:none;background:#fff;padding:24px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.section.active{display:block}
+h3{color:#1a237e;margin-bottom:12px;font-size:1.1em}
+.card{background:#f8f9fa;padding:16px;border-radius:8px;margin-bottom:16px;border-left:4px solid #1a237e}
+.card h3{color:#1a237e}
+.card-warning{border-left-color:#e65100;background:#fff3e0}
+.card-warning h3{color:#e65100}
+.card-success{border-left-color:#1b5e20;background:#e8f5e9}
+.card-success h3{color:#1b5e20}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;margin-bottom:14px}
+label{font-weight:600;color:#333;margin-bottom:6px;font-size:.9em}
+label .req{color:#c62828}
+input,select,textarea{padding:10px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:.95em;transition:border-color .2s;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#1a237e}
+textarea{resize:vertical;min-height:80px}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
+.checkbox-item{display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;border:2px solid #e0e0e0;border-radius:6px;font-size:.9em;transition:all .2s}
+.checkbox-item:hover{border-color:#1a237e;background:#e8eaf6}
+.checkbox-item input[type=checkbox]{width:16px;height:16px;cursor:pointer}
+.checkbox-item.checked{border-color:#1a237e;background:#e8eaf6;font-weight:600}
+.btn{padding:10px 24px;border:none;border-radius:6px;font-size:.95em;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:#1a237e;color:#fff}
+.btn-primary:hover{background:#283593}
+.btn-secondary{background:#4a148c;color:#fff}
+.btn-secondary:hover{background:#6a1b9a}
+.btn-danger{background:#c62828;color:#fff}
+.btn-danger:hover{background:#b71c1c}
+.btn-outline{background:#fff;color:#1a237e;border:2px solid #1a237e}
+.btn-outline:hover{background:#e8eaf6}
+.btn-sm{padding:6px 14px;font-size:.85em}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.9em}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e0e0e0}
+th{background:#1a237e;color:#fff;font-weight:600}
+tr:hover{background:#f5f5f5}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.8em;font-weight:600}
+.badge-grave{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.badge-moderada{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
+.badge-leve{background:#fffde7;color:#f57f17;border:1px solid #fff176}
+.badge-insuficiente{background:#eceff1;color:#546e7a;border:1px solid #b0bec5}
+.badge-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+.empty-state{text-align:center;padding:40px;color:#666}
+.empty-state h3{color:#1a237e;margin-bottom:8px}
+.alert{padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:.9em}
+.alert-success{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+.alert-error{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.alert-info{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9}
+.accordion-header{background:linear-gradient(135deg,#1a237e,#4a148c);color:#fff;padding:12px 16px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-weight:600;font-size:.95em;user-select:none}
+.accordion-header:hover{opacity:.9}
+.accordion-body{padding:16px;background:#f8f9fa;border-radius:0 0 6px 6px;margin-bottom:12px}
+/* Domínios */
+.dominio-section{margin-bottom:20px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden}
+.dominio-header{background:linear-gradient(135deg,#1a237e,#4a148c);color:#fff;padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.dominio-header:hover{opacity:.92}
+.dominio-header .dominio-info{font-size:.85em;opacity:.85}
+.dominio-body{padding:16px}
+.atividade-item{background:#fff;border:1px solid #e8eaf6;border-radius:8px;padding:14px;margin-bottom:10px}
+.atividade-nome{font-weight:600;color:#1a237e;margin-bottom:10px;font-size:.95em}
+.pontuacao-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.pontuacao-btn{padding:8px 16px;border:2px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;transition:all .2s;font-weight:700;font-size:.9em;min-width:72px;text-align:center}
+.pontuacao-btn .label{font-size:.7em;font-weight:400;display:block;line-height:1.2;margin-top:2px}
+.pontuacao-btn:hover{transform:scale(1.04);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.p25.selected{background:#c62828;border-color:#b71c1c;color:#fff}
+.p50.selected{background:#e65100;border-color:#bf360c;color:#fff}
+.p75.selected{background:#f9a825;border-color:#f57f17;color:#fff}
+.p100.selected{background:#2e7d32;border-color:#1b5e20;color:#fff}
+.p25:hover{border-color:#c62828}
+.p50:hover{border-color:#e65100}
+.p75:hover{border-color:#f9a825}
+.p100:hover{border-color:#2e7d32}
+.barreiras-section{margin-top:8px;padding:10px;background:#fff3e0;border-radius:6px;border:1px solid #ffcc80}
+.barreiras-section.hidden{display:none}
+.barreiras-label{font-size:.8em;font-weight:600;color:#e65100;margin-bottom:6px}
+.barreiras-checks{display:flex;flex-wrap:wrap;gap:8px}
+.barreira-cb{display:flex;align-items:center;gap:4px;font-size:.8em;padding:4px 8px;border:1px solid #ffcc80;border-radius:4px;cursor:pointer;background:#fff}
+.barreira-cb:hover{background:#ffe0b2}
+.barreira-cb input{width:14px;height:14px;cursor:pointer}
+.obs-toggle{font-size:.8em;color:#1a237e;cursor:pointer;text-decoration:underline;margin-top:4px;display:inline-block}
+.obs-field{display:none;margin-top:6px}
+.obs-field textarea{min-height:48px;font-size:.85em}
+/* Resultados */
+.resultado-header{padding:24px;border-radius:10px;text-align:center;margin-bottom:20px;color:#fff}
+.resultado-grave{background:linear-gradient(135deg,#c62828,#b71c1c)}
+.resultado-moderada{background:linear-gradient(135deg,#e65100,#bf360c)}
+.resultado-leve{background:linear-gradient(135deg,#f9a825,#f57f17)}
+.resultado-insuficiente{background:linear-gradient(135deg,#546e7a,#37474f)}
+.resultado-score{font-size:3.5em;font-weight:700;margin:12px 0}
+.resultado-class{font-size:1.4em;text-transform:uppercase;letter-spacing:2px}
+.score-bar-container{margin:16px 0}
+.score-bar{width:100%;height:24px;background:#e0e0e0;border-radius:12px;overflow:hidden;position:relative}
+.score-bar-grave{position:absolute;left:0;height:100%;background:#c62828;border-radius:12px 0 0 12px}
+.score-bar-moderada{position:absolute;height:100%;background:#e65100}
+.score-bar-leve{position:absolute;height:100%;background:#f9a825}
+.score-bar-insuficiente{position:absolute;height:100%;background:#90a4ae;border-radius:0 12px 12px 0}
+.score-bar-marker{position:absolute;top:-2px;width:4px;height:28px;background:#1a237e;border-radius:2px}
+.score-bar-labels{display:flex;justify-content:space-between;font-size:.75em;color:#666;margin-top:4px}
+.esp-resultado{background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:16px;border-left:4px solid #1a237e}
+.esp-resultado h3{color:#1a237e;margin-bottom:8px}
+.dominio-resultado{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:.9em}
+.dominio-resultado:last-child{border-bottom:none}
+.fuzzy-badge{display:inline-block;padding:2px 8px;background:#e8f5e9;color:#1b5e20;border-radius:4px;font-size:.75em;font-weight:600;margin-left:6px}
+/* Print */
+@media print{
+  body{background:#fff;padding:0}
+  .nav-tabs,.actions,.no-print,.btn{display:none!important}
+  .container{max-width:100%;padding:10px}
+  .section{display:block!important;box-shadow:none;padding:10px}
+  .dominio-body{display:block!important}
+}
+@media(max-width:600px){
+  h1{font-size:1.3em}
+  .pontuacao-btn{padding:6px 10px;min-width:60px}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>IF-BrA</h1>
+    <h2>Indice de Funcionalidade Brasileiro Aplicado</h2>
+    <p>Lei Complementar nº 142/2013 — INSS — Perícia Médica e Serviço Social</p>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('home')">Início</button>
+    <button class="nav-tab" onclick="showSection('novo')">Novo Avaliado</button>
+    <button class="nav-tab" onclick="showSection('avaliar')">Avaliar</button>
+    <button class="nav-tab" onclick="showSection('resultados')">Resultados</button>
+  </nav>
+
+  <!-- HOME -->
+  <section id="home" class="section active">
+    <h3>Sistema IF-BrA — LC 142/2013</h3>
+    <div class="card">
+      <h3>O que é o IF-BrA</h3>
+      <p>O Índice de Funcionalidade Brasileiro (IF-BrA) é o instrumento oficial do INSS para avaliação da funcionalidade da pessoa com deficiência, utilizado para concessão de aposentadoria pela Lei Complementar nº 142/2013. Baseado na Classificação Internacional de Funcionalidade (CIF/OMS).</p>
+    </div>
+    <div class="card">
+      <h3>7 Domínios — 41 Atividades</h3>
+      <table>
+        <thead><tr><th>Cód.</th><th>Domínio</th><th>Atividades</th></tr></thead>
+        <tbody id="tb-dominios"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Escala de Pontuação</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+        <span class="badge" style="background:#ffebee;color:#c62828;border:1px solid #ef9a9a;font-size:.9em;padding:6px 14px">25 — Não realiza / Totalmente dependente</span>
+        <span class="badge" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80;font-size:.9em;padding:6px 14px">50 — Realiza com auxílio de terceiros</span>
+        <span class="badge" style="background:#fffde7;color:#f57f17;border:1px solid #fff176;font-size:.9em;padding:6px 14px">75 — Realiza de forma adaptada</span>
+        <span class="badge" style="background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;font-size:.9em;padding:6px 14px">100 — Realiza independentemente</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Classificação Final (LC 142/2013)</h3>
+      <table>
+        <thead><tr><th>Grau</th><th>Pontuação Total</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-grave">Grave</span></td><td>≤ 5.739</td></tr>
+          <tr><td><span class="badge badge-moderada">Moderada</span></td><td>5.740 a 6.354</td></tr>
+          <tr><td><span class="badge badge-leve">Leve</span></td><td>6.355 a 7.584</td></tr>
+          <tr><td><span class="badge badge-insuficiente">Insuficiente para concessão</span></td><td>≥ 7.585</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;font-size:.85em;color:#555">* Pontuação mínima: 2.050 (25 × 41 atividades × 2 aplicadores) | Máxima: 8.200 (100 × 41 × 2)</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="showSection('novo')">Cadastrar Avaliado</button>
+      <button class="btn btn-secondary" onclick="showSection('avaliar')">Iniciar Avaliação</button>
+    </div>
+  </section>
+
+  <!-- NOVO AVALIADO -->
+  <section id="novo" class="section">
+    <h3>Cadastro do Avaliado</h3>
+    <div id="alerta-novo"></div>
+
+    <div class="accordion-header" onclick="toggleAccordion('acc-identificacao')">
+      <span>1. Identificação do Avaliado</span><span id="acc-identificacao-icon">▼</span>
+    </div>
+    <div id="acc-identificacao" class="accordion-body">
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Nome Completo <span class="req">*</span></label>
+          <input type="text" id="n-nome" placeholder="Nome completo do avaliado">
+        </div>
+        <div class="form-group">
+          <label>NIS / NIT</label>
+          <input type="text" id="n-nis" placeholder="Número de Identificação Social">
+        </div>
+        <div class="form-group">
+          <label>Sexo</label>
+          <select id="n-sexo">
+            <option value="">Selecione</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Idade (anos completos)</label>
+          <input type="number" id="n-idade" min="0" max="150">
+        </div>
+        <div class="form-group">
+          <label>Cor/Raça</label>
+          <select id="n-cor">
+            <option value="">Selecione</option>
+            <option value="Branca">Branca</option>
+            <option value="Preta">Preta</option>
+            <option value="Parda">Parda</option>
+            <option value="Amarela">Amarela (japonesa, chinesa, coreana...)</option>
+            <option value="Indígena">Indígena</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-header" onclick="toggleAccordion('acc-medico')">
+      <span>2. Dados Médicos <small style="font-weight:400">(Perito Médico)</small></span><span id="acc-medico-icon">▼</span>
+    </div>
+    <div id="acc-medico" class="accordion-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>CID Causa (etiologia)</label>
+          <input type="text" id="n-cid-causa" placeholder="ex: G35">
+        </div>
+        <div class="form-group">
+          <label>CID Sequela</label>
+          <input type="text" id="n-cid-sequela" placeholder="ex: G83">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="n-sem-diag" style="width:16px;height:16px;margin-right:6px">
+          Sem diagnóstico etiológico
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Tipo de Impedimento <small style="font-weight:400">(máx. 2)</small></label>
+        <div class="checkbox-group" id="tipo-impedimento-group">
+          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Auditiva"> Auditiva</label>
+          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Intelectual/Cognitiva"> Intelectual / Cognitiva</label>
+          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Fisica/Motora"> Física / Motora</label>
+          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Visual"> Visual</label>
+          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Mental"> Mental</label>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data de Início do Impedimento</label>
+          <input type="date" id="n-data-inicio">
+        </div>
+        <div class="form-group">
+          <label>Data de Alteração do Impedimento</label>
+          <input type="date" id="n-data-alt">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Funções Corporais Acometidas</label>
+        <textarea id="n-funcoes" placeholder="Descreva as funções corporais acometidas (Mentais, Sensoriais, Voz/Fala, Cardiovascular, Digestivo, Geniturinário, Neuromusculoesquelético, Pele...)"></textarea>
+      </div>
+      <div class="form-group">
+        <label>História Clínica <small style="font-weight:400">(Perito Médico)</small></label>
+        <textarea id="n-historia-clinica" placeholder="Resumo dos principais elementos clínicos relevantes"></textarea>
+      </div>
+    </div>
+
+    <div class="accordion-header" onclick="toggleAccordion('acc-social')">
+      <span>3. Dados Sociais <small style="font-weight:400">(Assistente Social)</small></span><span id="acc-social-icon">▼</span>
+    </div>
+    <div id="acc-social" class="accordion-body">
+      <div class="form-group">
+        <label>História Social <small style="font-weight:400">(Assistente Social)</small></label>
+        <textarea id="n-historia-social" placeholder="Resumo dos principais elementos sociais relevantes"></textarea>
+      </div>
+    </div>
+
+    <div class="accordion-header" onclick="toggleAccordion('acc-avaliacao')">
+      <span>4. Identificação da Avaliação</span><span id="acc-avaliacao-icon">▼</span>
+    </div>
+    <div id="acc-avaliacao" class="accordion-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data da Avaliação</label>
+          <input type="date" id="n-data-aval">
+        </div>
+        <div class="form-group">
+          <label>Código da APS</label>
+          <input type="text" id="n-aps" placeholder="Código da Agência">
+        </div>
+        <div class="form-group">
+          <label>Local da Avaliação</label>
+          <input type="text" id="n-local" placeholder="Nome da instituição / município / estado">
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion-header" onclick="toggleAccordion('acc-fuzzy')">
+      <span>5. Perguntas Emblemáticas (Modelo Fuzzy)</span><span id="acc-fuzzy-icon">▼</span>
+    </div>
+    <div id="acc-fuzzy" class="accordion-body">
+      <div class="alert alert-info">Responda somente as perguntas pertinentes ao tipo de impedimento identificado. As respostas afirmativas ativam o ajuste automático Fuzzy no cálculo do resultado.</div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="n-fuzzy-surdez" style="width:16px;height:16px;margin-right:8px">
+          <strong>[Auditiva]</strong> A surdez ocorreu antes dos 6 anos?
+        </label>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="n-fuzzy-sozinho" style="width:16px;height:16px;margin-right:8px">
+          <strong>[Intelectual/Cognitiva ou Mental]</strong> Não pode ficar sozinho em segurança?
+        </label>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="n-fuzzy-cadeira" style="width:16px;height:16px;margin-right:8px">
+          <strong>[Física/Motora]</strong> Desloca-se exclusivamente em cadeira de rodas?
+        </label>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="n-fuzzy-cego" style="width:16px;height:16px;margin-right:8px">
+          <strong>[Visual]</strong> A pessoa já não enxerga ao nascer?
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="criarAvaliado()">Cadastrar Avaliado</button>
+      <button class="btn btn-outline" onclick="limparFormNovo()">Limpar</button>
+    </div>
+  </section>
+
+  <!-- AVALIAR -->
+  <section id="avaliar" class="section">
+    <div id="avaliar-lista">
+      <h3>Avaliados Cadastrados</h3>
+      <div id="alerta-avaliar"></div>
+      <div id="lista-pacientes"></div>
+    </div>
+
+    <div id="avaliar-especialidade" style="display:none">
+      <h3>Selecione o Aplicador</h3>
+      <p style="color:#555;margin-bottom:16px">Avaliado: <strong id="esp-nome-avaliado"></strong></p>
+      <div id="esp-btns" class="actions"></div>
+      <div class="actions">
+        <button class="btn btn-outline btn-sm" onclick="voltarLista()">← Voltar</button>
+      </div>
+    </div>
+
+    <div id="avaliar-sessao" style="display:none">
+      <h3>Dados do Avaliador</h3>
+      <p style="color:#555;margin-bottom:16px">Avaliado: <strong id="sess-nome-avaliado"></strong> &nbsp;|&nbsp; Especialidade: <strong id="sess-especialidade"></strong></p>
+      <div id="alerta-sessao"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nome do Avaliador <span class="req">*</span></label>
+          <input type="text" id="sess-nome" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label>SIAPE</label>
+          <input type="text" id="sess-siape" placeholder="Matrícula SIAPE">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Quem prestou as informações</label>
+        <select id="sess-quem">
+          <option value="">Selecione</option>
+          <option value="propria_pessoa">A própria pessoa</option>
+          <option value="convivio_proximo">Pessoa de convívio próximo</option>
+          <option value="ambos">Ambos</option>
+          <option value="outros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group" id="sess-informante-grupo" style="display:none">
+        <label>Identificar o informante</label>
+        <input type="text" id="sess-informante" placeholder="ex: mãe, irmão, cuidador">
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="avancarParaAvaliacao()">Iniciar Avaliação →</button>
+        <button class="btn btn-outline btn-sm" onclick="voltarEspecialidade()">← Voltar</button>
+      </div>
+    </div>
+
+    <div id="avaliar-form" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+        <div>
+          <h3 style="margin:0">Avaliando: <span id="form-nome-avaliado"></span></h3>
+          <p style="color:#555;font-size:.9em">Especialidade: <strong id="form-especialidade"></strong></p>
+        </div>
+        <div id="form-progresso" style="font-weight:600;color:#1a237e;font-size:1.1em"></div>
+      </div>
+      <div id="alerta-form"></div>
+      <div id="dominios-container"></div>
+      <div class="actions no-print">
+        <button class="btn btn-primary" onclick="salvarAvaliacao()">Salvar Avaliação</button>
+        <button class="btn btn-outline btn-sm" onclick="voltarSessao()">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section id="resultados" class="section">
+    <div id="resultado-container">
+      <div class="empty-state">
+        <h3>Nenhum resultado carregado</h3>
+        <p>Vá para "Avaliar", selecione um avaliado e clique em "Ver Resultado"</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ─── Estado global ─────────────────────────────────────────────────────────
+let state = {
+  avaliadoId: null,
+  avaliadoNome: null,
+  especialidade: null,
+  avaliacoes: {},    // key: "DOM|atividade" → {pontuacao, barreiras, obs}
+  dominiosData: [],
+  especialidadesData: []
+}
+
+// ─── Segurança XSS ────────────────────────────────────────────────────────
+function esc(s) {
+  if (s == null) return ''
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
+}
+
+// ─── Utilitários ──────────────────────────────────────────────────────────
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  document.querySelector(`.nav-tab[onclick="showSection('${id}')"]`).classList.add('active')
+  if (id === 'avaliar') loadAvaliados()
+}
+
+function toggleAccordion(id) {
+  const el = document.getElementById(id)
+  const icon = document.getElementById(id + '-icon')
+  const hidden = el.style.display === 'none'
+  el.style.display = hidden ? 'block' : 'none'
+  if (icon) icon.textContent = hidden ? '▲' : '▼'
+}
+
+function showAlerta(containerId, msg, tipo = 'success') {
+  const el = document.getElementById(containerId)
+  if (!el) return
+  el.innerHTML = `<div class="alert alert-${tipo}">${esc(msg)}</div>`
+  setTimeout(() => { el.innerHTML = '' }, 4000)
+}
+
+function classificacaoCss(cls) {
+  const m = { 'Grave': 'grave', 'Moderada': 'moderada', 'Leve': 'leve' }
+  return m[cls] || 'insuficiente'
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+async function init() {
+  const [dominios, especialidades] = await Promise.all([
+    fetch('/api/dominios').then(r => r.json()).catch(() => []),
+    fetch('/api/especialidades').then(r => r.json()).catch(() => [])
+  ])
+  state.dominiosData = dominios
+  state.especialidadesData = especialidades
+  renderHomeDominios()
+}
+
+function renderHomeDominios() {
+  const tbody = document.getElementById('tb-dominios')
+  if (!tbody) return
+  tbody.innerHTML = state.dominiosData.map(d =>
+    `<tr><td><strong>${esc(d.codigo)}</strong></td><td>${esc(d.nome)}</td><td>${d.atividades.length}</td></tr>`
+  ).join('')
+}
+
+// ─── Novo Avaliado ────────────────────────────────────────────────────────
+document.querySelectorAll('.tipo-cb').forEach(cb => {
+  cb.addEventListener('change', () => {
+    const checked = [...document.querySelectorAll('.tipo-cb:checked')]
+    if (checked.length > 2) { cb.checked = false; showAlerta('alerta-novo', 'Selecione no máximo 2 tipos de impedimento', 'error') }
+    document.querySelectorAll('.checkbox-item').forEach(li => {
+      li.classList.toggle('checked', li.querySelector('input').checked)
+    })
+  })
+})
+
+document.getElementById('sess-quem').addEventListener('change', function() {
+  const grp = document.getElementById('sess-informante-grupo')
+  grp.style.display = (this.value === 'convivio_proximo' || this.value === 'outros') ? 'block' : 'none'
+})
+
+function limparFormNovo() {
+  ['n-nome','n-nis','n-idade','n-cid-causa','n-cid-sequela','n-data-inicio','n-data-alt','n-funcoes','n-historia-clinica','n-historia-social','n-data-aval','n-aps','n-local']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = '' })
+  document.getElementById('n-sexo').value = ''
+  document.getElementById('n-cor').value = ''
+  document.getElementById('n-sem-diag').checked = false
+  document.querySelectorAll('.tipo-cb').forEach(cb => { cb.checked = false })
+  document.querySelectorAll('.checkbox-item').forEach(li => li.classList.remove('checked'))
+  ;['n-fuzzy-surdez','n-fuzzy-sozinho','n-fuzzy-cadeira','n-fuzzy-cego'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.checked = false
+  })
+  document.getElementById('alerta-novo').innerHTML = ''
+}
+
+async function criarAvaliado() {
+  const nome = document.getElementById('n-nome').value.trim()
+  if (!nome) { showAlerta('alerta-novo', 'Nome é obrigatório', 'error'); return }
+
+  const tipos = [...document.querySelectorAll('.tipo-cb:checked')].map(cb => cb.value)
+  const idadeVal = document.getElementById('n-idade').value
+  const idade = idadeVal === '' ? null : parseInt(idadeVal)
+
+  const data = {
+    nome,
+    nis_nit: document.getElementById('n-nis').value || null,
+    sexo: document.getElementById('n-sexo').value || null,
+    idade,
+    cor_raca: document.getElementById('n-cor').value || null,
+    cid_causa: document.getElementById('n-cid-causa').value || null,
+    cid_sequela: document.getElementById('n-cid-sequela').value || null,
+    sem_diagnostico_etiologico: document.getElementById('n-sem-diag').checked,
+    tipo_impedimento: tipos.length > 0 ? tipos.join(',') : null,
+    data_inicio_impedimento: document.getElementById('n-data-inicio').value || null,
+    data_alteracao_impedimento: document.getElementById('n-data-alt').value || null,
+    funcoes_corporais: document.getElementById('n-funcoes').value || null,
+    historia_clinica: document.getElementById('n-historia-clinica').value || null,
+    historia_social: document.getElementById('n-historia-social').value || null,
+    data_avaliacao: document.getElementById('n-data-aval').value || null,
+    codigo_aps: document.getElementById('n-aps').value || null,
+    local_avaliacao: document.getElementById('n-local').value || null,
+    fuzzy_surdez_antes_6anos: document.getElementById('n-fuzzy-surdez').checked,
+    fuzzy_nao_pode_sozinho: document.getElementById('n-fuzzy-sozinho').checked,
+    fuzzy_cadeira_rodas: document.getElementById('n-fuzzy-cadeira').checked,
+    fuzzy_cego_ao_nascer: document.getElementById('n-fuzzy-cego').checked
+  }
+
+  try {
+    const res = await fetch('/api/avaliados', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    const result = await res.json()
+    if (!res.ok) throw new Error(result.error || 'Erro ao cadastrar')
+    showAlerta('alerta-novo', `Avaliado "${nome}" cadastrado com sucesso!`)
+    limparFormNovo()
+  } catch (e) {
+    showAlerta('alerta-novo', e.message, 'error')
+  }
+}
+
+// ─── Lista de Avaliados ───────────────────────────────────────────────────
+async function loadAvaliados() {
+  const container = document.getElementById('lista-pacientes')
+  container.innerHTML = '<p style="color:#666;padding:12px">Carregando...</p>'
+  try {
+    const avaliados = await fetch('/api/avaliados').then(r => r.json())
+    renderListaAvaliados(avaliados)
+  } catch {
+    container.innerHTML = '<div class="alert alert-error">Erro ao carregar avaliados</div>'
+  }
+}
+
+function renderListaAvaliados(avaliados) {
+  const container = document.getElementById('lista-pacientes')
+  if (!avaliados.length) {
+    container.innerHTML = '<div class="empty-state"><h3>Nenhum avaliado cadastrado</h3><p>Cadastre um avaliado na aba "Novo Avaliado"</p></div>'
+    return
+  }
+  const tbody = avaliados.map(a => {
+    const tipos = a.tipo_impedimento ? a.tipo_impedimento.split(',').map(t =>
+      `<span class="badge badge-ok" style="font-size:.75em">${esc(t)}</span>`
+    ).join(' ') : '<span style="color:#999">—</span>'
+    return `<tr>
+      <td>${esc(a.nome)}</td>
+      <td>${esc(a.nis_nit) || '—'}</td>
+      <td>${a.sexo === 'M' ? 'Masc.' : a.sexo === 'F' ? 'Fem.' : '—'}</td>
+      <td>${a.idade || '—'}</td>
+      <td>${tipos}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-primary btn-sm" onclick="iniciarAvaliacaoFlow(${a.id},'${esc(a.nome)}')">Avaliar</button>
+        <button class="btn btn-secondary btn-sm" onclick="verResultado(${a.id})">Resultado</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirAvaliado(${a.id},'${esc(a.nome)}')">Excluir</button>
+      </td>
+    </tr>`
+  }).join('')
+  container.innerHTML = `<table>
+    <thead><tr><th>Nome</th><th>NIS/NIT</th><th>Sexo</th><th>Idade</th><th>Impedimento</th><th>Ações</th></tr></thead>
+    <tbody>${tbody}</tbody>
+  </table>`
+}
+
+async function excluirAvaliado(id, nome) {
+  if (!confirm(`Excluir avaliado "${nome}" e todas as suas avaliações?`)) return
+  try {
+    await fetch(`/api/avaliados/${id}`, { method: 'DELETE' })
+    showAlerta('alerta-avaliar', `Avaliado "${nome}" excluído`)
+    loadAvaliados()
+  } catch { showAlerta('alerta-avaliar', 'Erro ao excluir', 'error') }
+}
+
+// ─── Fluxo de Avaliação ───────────────────────────────────────────────────
+function iniciarAvaliacaoFlow(id, nome) {
+  state.avaliadoId = id
+  state.avaliadoNome = nome
+  state.especialidade = null
+  state.avaliacoes = {}
+
+  document.getElementById('esp-nome-avaliado').textContent = nome
+  document.getElementById('avaliar-lista').style.display = 'none'
+  document.getElementById('avaliar-especialidade').style.display = 'block'
+  document.getElementById('avaliar-sessao').style.display = 'none'
+  document.getElementById('avaliar-form').style.display = 'none'
+
+  const btns = document.getElementById('esp-btns')
+  btns.innerHTML = ''
+  state.especialidadesData.forEach(esp => {
+    const btn = document.createElement('button')
+    btn.className = 'btn btn-primary'
+    btn.textContent = esp
+    btn.onclick = () => selecionarEspecialidade(esp)
+    btns.appendChild(btn)
+  })
+}
+
+function selecionarEspecialidade(esp) {
+  state.especialidade = esp
+  document.getElementById('sess-nome-avaliado').textContent = state.avaliadoNome
+  document.getElementById('sess-especialidade').textContent = esp
+  document.getElementById('sess-nome').value = ''
+  document.getElementById('sess-siape').value = ''
+  document.getElementById('sess-quem').value = ''
+  document.getElementById('sess-informante').value = ''
+  document.getElementById('sess-informante-grupo').style.display = 'none'
+  document.getElementById('avaliar-especialidade').style.display = 'none'
+  document.getElementById('avaliar-sessao').style.display = 'block'
+}
+
+async function avancarParaAvaliacao() {
+  const nome = document.getElementById('sess-nome').value.trim()
+  if (!nome) { showAlerta('alerta-sessao', 'Informe o nome do avaliador', 'error'); return }
+
+  const sessaoData = {
+    especialidade: state.especialidade,
+    nome_avaliador: nome,
+    siape: document.getElementById('sess-siape').value || null,
+    quem_informou: document.getElementById('sess-quem').value || null,
+    quem_informou_id: document.getElementById('sess-informante').value || null
+  }
+
+  try {
+    await fetch(`/api/avaliados/${state.avaliadoId}/sessoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sessaoData)
+    })
+  } catch {}
+
+  // Carregar avaliações existentes
+  state.avaliacoes = {}
+  try {
+    const existing = await fetch(`/api/avaliados/${state.avaliadoId}/avaliacoes?especialidade=${encodeURIComponent(state.especialidade)}`).then(r => r.json())
+    existing.forEach(a => {
+      state.avaliacoes[`${a.dominio}|${a.atividade}`] = {
+        pontuacao: a.pontuacao,
+        barreira_pt: a.barreira_pt, barreira_amb: a.barreira_amb,
+        barreira_ar: a.barreira_ar, barreira_at: a.barreira_at,
+        barreira_ssp: a.barreira_ssp, observacao: a.observacao || ''
+      }
+    })
+  } catch {}
+
+  state.nomeAvaliador = nome
+  document.getElementById('form-nome-avaliado').textContent = state.avaliadoNome
+  document.getElementById('form-especialidade').textContent = state.especialidade
+  document.getElementById('avaliar-sessao').style.display = 'none'
+  document.getElementById('avaliar-form').style.display = 'block'
+  renderDominiosForm()
+}
+
+function voltarLista() {
+  state.avaliadoId = null
+  document.getElementById('avaliar-lista').style.display = 'block'
+  document.getElementById('avaliar-especialidade').style.display = 'none'
+  document.getElementById('avaliar-sessao').style.display = 'none'
+  document.getElementById('avaliar-form').style.display = 'none'
+  loadAvaliados()
+}
+function voltarEspecialidade() {
+  document.getElementById('avaliar-especialidade').style.display = 'block'
+  document.getElementById('avaliar-sessao').style.display = 'none'
+}
+function voltarSessao() {
+  document.getElementById('avaliar-sessao').style.display = 'block'
+  document.getElementById('avaliar-form').style.display = 'none'
+}
+
+// ─── Formulário de Avaliação ──────────────────────────────────────────────
+function renderDominiosForm() {
+  const container = document.getElementById('dominios-container')
+  container.innerHTML = ''
+  state.dominiosData.forEach(dominio => {
+    const div = document.createElement('div')
+    div.className = 'dominio-section'
+
+    const header = document.createElement('div')
+    header.className = 'dominio-header'
+    header.innerHTML = `
+      <span><strong>${esc(dominio.codigo)}</strong> — ${esc(dominio.nome)}</span>
+      <span class="dominio-info">${dominio.atividades.length} atividades</span>
+    `
+    header.onclick = () => {
+      const body = div.querySelector('.dominio-body')
+      body.style.display = body.style.display === 'none' ? 'block' : 'none'
+    }
+
+    const body = document.createElement('div')
+    body.className = 'dominio-body'
+
+    dominio.atividades.forEach(atividade => {
+      const key = `${dominio.codigo}|${atividade}`
+      const saved = state.avaliacoes[key] || {}
+      const item = criarAtividadeItem(key, atividade, saved)
+      body.appendChild(item)
+    })
+
+    div.appendChild(header)
+    div.appendChild(body)
+    container.appendChild(div)
+  })
+  atualizarProgresso()
+}
+
+function criarAtividadeItem(key, nome, saved) {
+  const item = document.createElement('div')
+  item.className = 'atividade-item'
+  item.dataset.key = key
+
+  const nomeDiv = document.createElement('div')
+  nomeDiv.className = 'atividade-nome'
+  nomeDiv.textContent = nome
+  item.appendChild(nomeDiv)
+
+  const row = document.createElement('div')
+  row.className = 'pontuacao-row'
+
+  const scores = [
+    { v: 25, cls: 'p25', label: 'Não\nRealiza' },
+    { v: 50, cls: 'p50', label: 'Com\nAuxílio' },
+    { v: 75, cls: 'p75', label: 'Adaptado' },
+    { v: 100, cls: 'p100', label: 'Independente' }
+  ]
+  scores.forEach(({ v, cls, label }) => {
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = `pontuacao-btn ${cls}${saved.pontuacao === v ? ' selected' : ''}`
+    btn.innerHTML = `${v}<span class="label">${label}</span>`
+    btn.onclick = () => setPontuacao(key, v)
+    row.appendChild(btn)
+  })
+  item.appendChild(row)
+
+  // Barreiras externas
+  const barDiv = document.createElement('div')
+  barDiv.className = `barreiras-section${(!saved.pontuacao || saved.pontuacao > 50) ? ' hidden' : ''}`
+  barDiv.id = `bar-${key.replace('|','-')}`
+  barDiv.innerHTML = `
+    <div class="barreiras-label">Barreiras externas identificadas:</div>
+    <div class="barreiras-checks">
+      ${[
+        ['barreira_pt','P e T — Produtos e Tecnologia'],
+        ['barreira_amb','Amb — Ambiente'],
+        ['barreira_ar','A e R — Apoio e Relacionamentos'],
+        ['barreira_at','At — Atitudes'],
+        ['barreira_ssp','SS e P — Serviços, Sistemas e Políticas']
+      ].map(([field, label]) => `
+        <label class="barreira-cb">
+          <input type="checkbox" data-key="${key}" data-field="${field}" ${saved[field] ? 'checked' : ''}>
+          ${label}
+        </label>
+      `).join('')}
+    </div>
+  `
+  barDiv.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const k = cb.dataset.key
+      const f = cb.dataset.field
+      if (!state.avaliacoes[k]) state.avaliacoes[k] = {}
+      state.avaliacoes[k][f] = cb.checked
+    })
+  })
+  item.appendChild(barDiv)
+
+  // Observação
+  const obsToggle = document.createElement('span')
+  obsToggle.className = 'obs-toggle'
+  obsToggle.textContent = saved.observacao ? '▼ Observação' : '+ Observação'
+  const obsField = document.createElement('div')
+  obsField.className = 'obs-field'
+  obsField.style.display = saved.observacao ? 'block' : 'none'
+  const obsInput = document.createElement('textarea')
+  obsInput.placeholder = 'Observações sobre esta atividade...'
+  obsInput.value = saved.observacao || ''
+  obsInput.onchange = () => {
+    if (!state.avaliacoes[key]) state.avaliacoes[key] = {}
+    state.avaliacoes[key].observacao = obsInput.value
+  }
+  obsField.appendChild(obsInput)
+  obsToggle.onclick = () => {
+    const visible = obsField.style.display !== 'none'
+    obsField.style.display = visible ? 'none' : 'block'
+    obsToggle.textContent = visible ? '+ Observação' : '▼ Observação'
+  }
+  item.appendChild(obsToggle)
+  item.appendChild(obsField)
+
+  return item
+}
+
+function setPontuacao(key, value) {
+  if (!state.avaliacoes[key]) state.avaliacoes[key] = {}
+  state.avaliacoes[key].pontuacao = value
+
+  const item = document.querySelector(`.atividade-item[data-key="${key}"]`)
+  if (!item) return
+
+  item.querySelectorAll('.pontuacao-btn').forEach(btn => {
+    const v = parseInt(btn.textContent)
+    btn.classList.toggle('selected', v === value)
+  })
+
+  const barId = `bar-${key.replace('|','-')}`
+  const barDiv = document.getElementById(barId)
+  if (barDiv) barDiv.classList.toggle('hidden', value > 50)
+
+  atualizarProgresso()
+}
+
+function atualizarProgresso() {
+  const total = state.dominiosData.reduce((s, d) => s + d.atividades.length, 0)
+  const feitas = Object.values(state.avaliacoes).filter(v => v.pontuacao != null).length
+  const el = document.getElementById('form-progresso')
+  if (el) el.textContent = `${feitas} / ${total} atividades pontuadas`
+}
+
+async function salvarAvaliacao() {
+  const nomeAvaliador = state.nomeAvaliador
+  if (!nomeAvaliador) { showAlerta('alerta-form', 'Nome do avaliador não encontrado', 'error'); return }
+
+  const avaliacoes = []
+  for (const [key, data] of Object.entries(state.avaliacoes)) {
+    if (data.pontuacao == null) continue
+    const [dominio, atividade] = key.split('|')
+    avaliacoes.push({
+      dominio, atividade,
+      pontuacao: data.pontuacao,
+      barreira_pt: !!data.barreira_pt,
+      barreira_amb: !!data.barreira_amb,
+      barreira_ar: !!data.barreira_ar,
+      barreira_at: !!data.barreira_at,
+      barreira_ssp: !!data.barreira_ssp,
+      observacao: data.observacao || null
+    })
+  }
+
+  if (avaliacoes.length === 0) {
+    showAlerta('alerta-form', 'Pontuação nenhuma atividade ainda', 'error')
+    return
+  }
+
+  try {
+    const res = await fetch('/api/avaliacoes/lote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        avaliado_id: state.avaliadoId,
+        especialidade: state.especialidade,
+        nome_avaliador: nomeAvaliador,
+        avaliacoes
+      })
+    })
+    const result = await res.json()
+    if (!res.ok) throw new Error(result.error)
+    showAlerta('alerta-form', `${result.total} avaliações salvas com sucesso!`)
+    atualizarProgresso()
+  } catch (e) {
+    showAlerta('alerta-form', e.message, 'error')
+  }
+}
+
+// ─── Resultado ────────────────────────────────────────────────────────────
+async function verResultado(id) {
+  try {
+    const res = await fetch(`/api/avaliados/${id}/resultado`)
+    const data = await res.json()
+    if (!res.ok) { showAlerta('alerta-avaliar', data.error || 'Erro ao carregar resultado', 'error'); return }
+    if (data.mensagem && !data.resultadoCombinado) { showAlerta('alerta-avaliar', data.mensagem, 'error'); return }
+    renderResultado(data)
+    showSection('resultados')
+  } catch {
+    showAlerta('alerta-avaliar', 'Erro ao carregar resultado', 'error')
+  }
+}
+
+function renderResultado(data) {
+  const { avaliado, resultadoPorEspecialidade, pontuacaoTotal, classificacao, totalAplicadores, observacao } = data
+
+  const cls = classificacaoCss(classificacao)
+  const MIN = 2050, MAX = 8200
+  const pct = Math.max(0, Math.min(100, ((pontuacaoTotal - MIN) / (MAX - MIN)) * 100))
+
+  // Faixas de cor na barra
+  // Grave: 2050-5739 → 0-58%
+  // Moderada: 5740-6354 → 58-68%
+  // Leve: 6355-7584 → 68-89%
+  // Insuficiente: 7585-8200 → 89-100%
+  const graVePct = ((5739 - MIN) / (MAX - MIN) * 100).toFixed(1)
+  const modPct = ((6354 - MIN) / (MAX - MIN) * 100).toFixed(1)
+  const levePct = ((7584 - MIN) / (MAX - MIN) * 100).toFixed(1)
+
+  const tiposStr = avaliado.tipo_impedimento
+    ? avaliado.tipo_impedimento.split(',').map(t => `<span class="badge badge-ok">${esc(t)}</span>`).join(' ')
+    : '—'
+
+  let html = `
+    <div class="resultado-header resultado-${cls}">
+      <h2>Resultado Final — IF-BrA</h2>
+      <div class="resultado-score">${pontuacaoTotal.toLocaleString('pt-BR')}</div>
+      <div class="resultado-class">${esc(classificacao)}</div>
+      <p style="margin-top:8px;opacity:.85;font-size:.9em">${totalAplicadores} aplicador(es) — ${totalAplicadores < 2 ? '⚠ Incompleto (falta 1 aplicador)' : 'Completo'}</p>
+    </div>
+
+    <div class="score-bar-container card">
+      <h3>Posição na Escala LC 142/2013</h3>
+      <div class="score-bar">
+        <div class="score-bar-grave" style="width:${graVePct}%"></div>
+        <div class="score-bar-moderada" style="left:${graVePct}%;width:${(modPct - graVePct).toFixed(1)}%"></div>
+        <div class="score-bar-leve" style="left:${modPct}%;width:${(levePct - modPct).toFixed(1)}%"></div>
+        <div class="score-bar-insuficiente" style="left:${levePct}%;width:${(100 - levePct).toFixed(1)}%"></div>
+        <div class="score-bar-marker" style="left:calc(${pct.toFixed(1)}% - 2px)"></div>
+      </div>
+      <div class="score-bar-labels">
+        <span><span class="badge badge-grave">Grave</span> ≤5.739</span>
+        <span><span class="badge badge-moderada">Moderada</span> 5.740–6.354</span>
+        <span><span class="badge badge-leve">Leve</span> 6.355–7.584</span>
+        <span><span class="badge badge-insuficiente">Insuficiente</span> ≥7.585</span>
+      </div>
+    </div>
+
+    ${observacao ? `<div class="alert alert-error">${esc(observacao)}</div>` : ''}
+
+    <div class="card">
+      <h3>Dados do Avaliado</h3>
+      <div class="form-grid" style="gap:8px">
+        <p><strong>Nome:</strong> ${esc(avaliado.nome)}</p>
+        <p><strong>NIS/NIT:</strong> ${esc(avaliado.nis_nit) || '—'}</p>
+        <p><strong>Sexo:</strong> ${avaliado.sexo === 'M' ? 'Masculino' : avaliado.sexo === 'F' ? 'Feminino' : '—'}</p>
+        <p><strong>Idade:</strong> ${avaliado.idade || '—'}</p>
+        <p><strong>Cor/Raça:</strong> ${esc(avaliado.cor_raca) || '—'}</p>
+        <p><strong>Tipo Impedimento:</strong> ${tiposStr}</p>
+        <p><strong>CID Causa:</strong> ${esc(avaliado.cid_causa) || '—'}</p>
+        <p><strong>CID Sequela:</strong> ${esc(avaliado.cid_sequela) || '—'}</p>
+        <p><strong>Data da Avaliação:</strong> ${avaliado.data_avaliacao ? new Date(avaliado.data_avaliacao).toLocaleDateString('pt-BR') : '—'}</p>
+        <p><strong>Local / APS:</strong> ${esc(avaliado.local_avaliacao) || '—'} ${avaliado.codigo_aps ? `(${esc(avaliado.codigo_aps)})` : ''}</p>
+      </div>
+    </div>
+  `
+
+  // Por especialidade
+  Object.entries(resultadoPorEspecialidade).forEach(([esp, res]) => {
+    const dominiosHTML = Object.entries(res.porDominio || {}).map(([cod, d]) =>
+      `<div class="dominio-resultado">
+        <span><strong>${esc(cod)}</strong> — ${esc(d.nome)}</span>
+        <span style="font-weight:600">${d.pontuacao} / ${d.maximo}</span>
+      </div>`
+    ).join('')
+
+    html += `
+      <div class="esp-resultado">
+        <h3>${esc(esp)} ${res.fuzzyAplicado ? '<span class="fuzzy-badge">Fuzzy aplicado</span>' : ''}</h3>
+        <p style="font-size:.85em;color:#555;margin-bottom:10px">Avaliador: <strong>${esc(res.nomeAvaliador)}</strong> &nbsp;|&nbsp; ${res.totalAtividades} atividades &nbsp;|&nbsp; Pontuação: <strong>${res.pontuacaoTotal} / ${res.pontuacaoMaxima}</strong></p>
+        ${dominiosHTML}
+      </div>
+    `
+  })
+
+  html += `
+    <div class="actions no-print">
+      <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
+      <button class="btn btn-outline" onclick="showSection('avaliar')">← Voltar</button>
+    </div>
+  `
+
+  document.getElementById('resultado-container').innerHTML = html
+}
+
+// ─── Start ────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init)
+</script>
+</body>
+</html>
