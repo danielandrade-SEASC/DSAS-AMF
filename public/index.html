@@ -137,15 +137,15 @@ tr:hover{background:#f5f5f5}
 <div class="container">
   <header>
     <h1>IF-BrA</h1>
-    <h2>Indice de Funcionalidade Brasileiro Aplicado</h2>
-   <!-- <p>Lei Complementar nº 142/2013 — INSS — Perícia Médica e Serviço Social</p> -->
+    <h2>Instrumento de Funcionalidade Brasileiro para Aposentadoria</h2>
+    <p>Lei Complementar nº 142/2013 — INSS — Perícia Médica e Serviço Social</p>
   </header>
 
   <nav class="nav-tabs">
     <button class="nav-tab active" onclick="showSection('home')">Início</button>
     <button class="nav-tab" onclick="showSection('novo')">Novo Avaliado</button>
     <button class="nav-tab" onclick="showSection('avaliar')">Avaliar</button>
-  <!-- <button class="nav-tab" onclick="showSection('resultados')">Resultados</button> -->
+    <button class="nav-tab" onclick="showSection('resultados')">Resultados</button>
   </nav>
 
   <!-- HOME -->
@@ -153,7 +153,7 @@ tr:hover{background:#f5f5f5}
     <h3>Sistema IF-BrA — LC 142/2013</h3>
     <div class="card">
       <h3>O que é o IF-BrA</h3>
-      <p>O Índice de Funcionalidade Brasileiro Aplicado é uma ferramenta paradronizada para avaliar a funcionalidade da pessoa com deficiência em diversos aspectos da vida, considerando a interação do indivíduo com as barreiras do ambiente.</p>
+      <p>O Índice de Funcionalidade Brasileiro (IF-BrA) é o instrumento oficial do INSS para avaliação da funcionalidade da pessoa com deficiência, utilizado para concessão de aposentadoria pela Lei Complementar nº 142/2013. Baseado na Classificação Internacional de Funcionalidade (CIF/OMS).</p>
     </div>
     <div class="card">
       <h3>7 Domínios — 41 Atividades</h3>
@@ -205,8 +205,8 @@ tr:hover{background:#f5f5f5}
           <input type="text" id="n-nome" placeholder="Nome completo do avaliado">
         </div>
         <div class="form-group">
-          <label>Matrícula</label>
-          <input type="text" id="n-nis" placeholder="Número da matrícula">
+          <label>NIS / NIT</label>
+          <input type="text" id="n-nis" placeholder="Número de Identificação Social">
         </div>
         <div class="form-group">
           <label>Sexo</label>
@@ -240,7 +240,7 @@ tr:hover{background:#f5f5f5}
     <div id="acc-medico" class="accordion-body">
       <div class="form-grid">
         <div class="form-group">
-          <label>CID</label>
+          <label>CID Causa (etiologia)</label>
           <input type="text" id="n-cid-causa" placeholder="ex: G35">
         </div>
         <div class="form-group">
@@ -258,10 +258,10 @@ tr:hover{background:#f5f5f5}
         <label>Tipo de Impedimento <small style="font-weight:400">(máx. 2)</small></label>
         <div class="checkbox-group" id="tipo-impedimento-group">
           <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Auditiva"> Auditiva</label>
-          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Intelectual/Cognitiva"> Intelectual / Cognitiva/Mental</label>
+          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Intelectual/Cognitiva"> Intelectual / Cognitiva</label>
           <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Fisica/Motora"> Física / Motora</label>
           <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Visual"> Visual</label>
-         <!-- <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Mental"> Mental</label> -->
+          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Mental"> Mental</label>
         </div>
       </div>
       <div class="form-grid">
@@ -303,12 +303,10 @@ tr:hover{background:#f5f5f5}
           <label>Data da Avaliação</label>
           <input type="date" id="n-data-aval">
         </div>
-        <!--
         <div class="form-group">
           <label>Código da APS</label>
           <input type="text" id="n-aps" placeholder="Código da Agência">
         </div>
-      -->
         <div class="form-group">
           <label>Local da Avaliação</label>
           <input type="text" id="n-local" placeholder="Nome da instituição / município / estado">
