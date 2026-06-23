@@ -487,6 +487,39 @@ tr:hover{background:#f5f5f5}
     <div id="avaliar-lista">
       <h3>Avaliados Cadastrados</h3>
       <div id="alerta-avaliar"></div>
+      
+      <!-- Campos de Pesquisa -->
+      <div class="card" style="margin-bottom:16px">
+        <h4 style="margin-bottom:12px;color:#1a237e">Pesquisar</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="filtro-nome" placeholder="Digite o nome" oninput="filtrarAvaliados()">
+          </div>
+          <div class="form-group">
+            <label>Matrícula (NIS/NIT)</label>
+            <input type="text" id="filtro-matricula" placeholder="Digite a matrícula" oninput="filtrarAvaliados()">
+          </div>
+          <div class="form-group">
+            <label>Data da Avaliação</label>
+            <input type="date" id="filtro-data" onchange="filtrarAvaliados()">
+          </div>
+          <div class="form-group">
+            <label>Tipo de Impedimento</label>
+            <select id="filtro-tipo" onchange="filtrarAvaliados()">
+              <option value="">Todos</option>
+              <option value="Auditiva">Auditiva</option>
+              <option value="Intelectual/Cognitiva">Intelectual / Cognitiva / Mental</option>
+              <option value="Fisica/Motora">Física / Motora</option>
+              <option value="Visual">Visual</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn btn-outline btn-sm" onclick="limparFiltros()">Limpar Filtros</button>
+        </div>
+      </div>
+      
       <div id="lista-pacientes"></div>
     </div>
 
@@ -569,7 +602,8 @@ let state = {
   especialidade: null,
   avaliacoes: {},    // key: "DOM|atividade" → {pontuacao, barreiras, obs}
   dominiosData: [],
-  especialidadesData: []
+  especialidadesData: [],
+  avaliadosData: []  // Lista completa de avaliados para filtro
 }
 
 // ─── Segurança XSS ────────────────────────────────────────────────────────
@@ -709,10 +743,46 @@ async function loadAvaliados() {
   container.innerHTML = '<p style="color:#666;padding:12px">Carregando...</p>'
   try {
     const avaliados = await fetch('/api/avaliados').then(r => r.json())
+    state.avaliadosData = avaliados  // Armazena a lista completa
     renderListaAvaliados(avaliados)
   } catch {
     container.innerHTML = '<div class="alert alert-error">Erro ao carregar avaliados</div>'
   }
+}
+
+function filtrarAvaliados() {
+  const nome = document.getElementById('filtro-nome').value.toLowerCase().trim()
+  const matricula = document.getElementById('filtro-matricula').value.toLowerCase().trim()
+  const data = document.getElementById('filtro-data').value
+  const tipo = document.getElementById('filtro-tipo').value
+  
+  let filtrados = state.avaliadosData
+  
+  if (nome) {
+    filtrados = filtrados.filter(a => a.nome && a.nome.toLowerCase().includes(nome))
+  }
+  
+  if (matricula) {
+    filtrados = filtrados.filter(a => a.nis_nit && a.nis_nit.toLowerCase().includes(matricula))
+  }
+  
+  if (data) {
+    filtrados = filtrados.filter(a => a.data_avaliacao === data)
+  }
+  
+  if (tipo) {
+    filtrados = filtrados.filter(a => a.tipo_impedimento && a.tipo_impedimento.includes(tipo))
+  }
+  
+  renderListaAvaliados(filtrados)
+}
+
+function limparFiltros() {
+  document.getElementById('filtro-nome').value = ''
+  document.getElementById('filtro-matricula').value = ''
+  document.getElementById('filtro-data').value = ''
+  document.getElementById('filtro-tipo').value = ''
+  filtrarAvaliados()
 }
 
 function renderListaAvaliados(avaliados) {
