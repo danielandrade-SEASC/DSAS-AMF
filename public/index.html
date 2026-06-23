@@ -120,11 +120,39 @@ tr:hover{background:#f5f5f5}
 .fuzzy-badge{display:inline-block;padding:2px 8px;background:#e8f5e9;color:#1b5e20;border-radius:4px;font-size:.75em;font-weight:600;margin-left:6px}
 /* Print */
 @media print{
-  body{background:#fff;padding:0}
+  body{background:#fff;padding:0;margin:0}
   .nav-tabs,.actions,.no-print,.btn{display:none!important}
-  .container{max-width:100%;padding:10px}
-  .section{display:block!important;box-shadow:none;padding:10px}
+  .container{max-width:100%;padding:20px}
+  .section{display:block!important;box-shadow:none;padding:0}
   .dominio-body{display:block!important}
+  .official-header{display:block!important}
+  @page {
+    margin: 2cm;
+  }
+}
+.official-header{
+  text-align:center;
+  padding:20px;
+  border-bottom:2px solid #1a237e;
+  margin-bottom:20px;
+  display:none
+}
+.official-header h1{
+  font-size:1.2em;
+  color:#1a237e;
+  margin:0
+}
+.official-header h2{
+  font-size:1em;
+  color:#4a148c;
+  margin:5px 0 0 0;
+  font-weight:400
+}
+.official-header h3{
+  font-size:0.95em;
+  color:#1a237e;
+  margin:5px 0 0 0;
+  font-weight:400
 }
 @media(max-width:600px){
   h1{font-size:1.3em}
@@ -135,6 +163,11 @@ tr:hover{background:#f5f5f5}
 </head>
 <body>
 <div class="container">
+  <div class="official-header" id="print-header">
+    <h1>ESTADO DE SANTA CATARINA</h1>
+    <h2>SECRETARIA DE ESTADO DA ADMINISTRAÇÃO</h2>
+    <h3>DIRETORIA DE SAÚDE DO SERVIDOR</h3>
+  </div>
   <header>
     <h1>IF-BrA</h1>
     <h2>Instrumento de Funcionalidade Brasileiro para Aposentadoria</h2>
@@ -1011,12 +1044,20 @@ function renderResultado(data) {
 
   html += `
     <div class="actions no-print">
-      <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
+      <button class="btn btn-primary" onclick="imprimirResultado()">Imprimir</button>
       <button class="btn btn-outline" onclick="showSection('avaliar')">← Voltar</button>
     </div>
   `
 
   document.getElementById('resultado-container').innerHTML = html
+}
+
+function imprimirResultado() {
+  document.getElementById('print-header').style.display = 'block'
+  window.print()
+  setTimeout(() => {
+    document.getElementById('print-header').style.display = 'none'
+  }, 500)
 }
 
 // ─── Start ────────────────────────────────────────────────────────────────
