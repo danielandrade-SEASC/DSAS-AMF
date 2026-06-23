@@ -118,6 +118,100 @@ tr:hover{background:#f5f5f5}
 .dominio-resultado{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:.9em}
 .dominio-resultado:last-child{border-bottom:none}
 .fuzzy-badge{display:inline-block;padding:2px 8px;background:#e8f5e9;color:#1b5e20;border-radius:4px;font-size:.75em;font-weight:600;margin-left:6px}
+
+/* Novos estilos para o layout da imagem */
+.section-title{
+  background:linear-gradient(135deg,#1a237e,#4a148c);
+  color:white;
+  padding:10px 15px;
+  border-radius:6px 6px 0 0;
+  font-weight:600;
+  font-size:0.95em
+}
+.dados-avaliado-section{
+  margin-bottom:20px;
+  border:1px solid #e0e0e0;
+  border-radius:6px;
+  overflow:hidden
+}
+.dados-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:10px;
+  padding:15px;
+  background:#f8f9fa;
+  font-size:0.9em
+}
+.especialidade-section{
+  margin-bottom:20px;
+  border:1px solid #e0e0e0;
+  border-radius:6px;
+  overflow:hidden
+}
+.especialidade-info{
+  padding:10px 15px;
+  background:#f8f9fa;
+  font-size:0.85em;
+  color:#555
+}
+.dominios-list{
+  padding:10px 15px
+}
+.dominio-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid #eee;
+  font-size:0.9em
+}
+.dominio-item:last-child{border-bottom:none}
+.dominio-item .pontuacao{font-weight:600;color:#1a237e}
+.resultado-final{
+  text-align:center;
+  padding:25px;
+  border-radius:6px;
+  margin-bottom:20px
+}
+.resultado-final-titulo{
+  font-size:1.1em;
+  font-weight:600;
+  margin-bottom:10px
+}
+.resultado-final-score{
+  font-size:3em;
+  font-weight:700;
+  margin:10px 0
+}
+.resultado-final-class{
+  font-size:1.3em;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  font-weight:600
+}
+.resultado-final-info{
+  font-size:0.9em;
+  margin-top:10px;
+  opacity:0.9
+}
+.escala-section{
+  border:1px solid #e0e0e0;
+  border-radius:6px;
+  overflow:hidden
+}
+.escala-titulo{
+  padding:15px;
+  font-weight:600;
+  font-size:0.95em;
+  border-bottom:1px solid #e0e0e0
+}
+.score-bar{
+  position:relative;
+  height:24px;
+  margin:15px;
+  border-radius:12px;
+  overflow:hidden
+}
 /* Print */
 @media print{
   body{background:#fff;padding:0;margin:0}
@@ -968,79 +1062,89 @@ function renderResultado(data) {
   const pct = Math.max(0, Math.min(100, ((pontuacaoTotal - MIN) / (MAX - MIN)) * 100))
 
   // Faixas de cor na barra
-  // Grave: 2050-5739 → 0-58%
-  // Moderada: 5740-6354 → 58-68%
-  // Leve: 6355-7584 → 68-89%
-  // Insuficiente: 7585-8200 → 89-100%
   const graVePct = ((5739 - MIN) / (MAX - MIN) * 100).toFixed(1)
   const modPct = ((6354 - MIN) / (MAX - MIN) * 100).toFixed(1)
   const levePct = ((7584 - MIN) / (MAX - MIN) * 100).toFixed(1)
 
   const tiposStr = avaliado.tipo_impedimento
-    ? avaliado.tipo_impedimento.split(',').map(t => `<span class="badge badge-ok">${esc(t)}</span>`).join(' ')
+    ? avaliado.tipo_impedimento.split(',').map(t => `<span style="background:#e8f5e9;color:#1b5e20;padding:2px 8px;border-radius:4px;font-size:.8em;font-weight:600">${esc(t)}</span>`).join(' ')
     : '—'
 
-  let html = `
-    <div class="resultado-header resultado-${cls}">
-      <h2>Resultado Final — IF-BrA</h2>
-      <div class="resultado-score">${pontuacaoTotal.toLocaleString('pt-BR')}</div>
-      <div class="resultado-class">${esc(classificacao)}</div>
-      <p style="margin-top:8px;opacity:.85;font-size:.9em">${totalAplicadores} aplicador(es) — ${totalAplicadores < 2 ? '⚠ Incompleto (falta 1 aplicador)' : 'Completo'}</p>
-    </div>
+  let html = ''
 
-    <div class="score-bar-container card">
-      <h3>Posição na Escala LC 142/2013</h3>
-      <div class="score-bar">
-        <div class="score-bar-grave" style="width:${graVePct}%"></div>
-        <div class="score-bar-moderada" style="left:${graVePct}%;width:${(modPct - graVePct).toFixed(1)}%"></div>
-        <div class="score-bar-leve" style="left:${modPct}%;width:${(levePct - modPct).toFixed(1)}%"></div>
-        <div class="score-bar-insuficiente" style="left:${levePct}%;width:${(100 - levePct).toFixed(1)}%"></div>
-        <div class="score-bar-marker" style="left:calc(${pct.toFixed(1)}% - 2px)"></div>
-      </div>
-      <div class="score-bar-labels">
-        <span><span class="badge badge-grave">Grave</span> ≤5.739</span>
-        <span><span class="badge badge-moderada">Moderada</span> 5.740–6.354</span>
-        <span><span class="badge badge-leve">Leve</span> 6.355–7.584</span>
-        <span><span class="badge badge-insuficiente">Insuficiente</span> ≥7.585</span>
-      </div>
-    </div>
-
-    ${observacao ? `<div class="alert alert-error">${esc(observacao)}</div>` : ''}
-
-    <div class="card">
-      <h3>Dados do Avaliado</h3>
-      <div class="form-grid" style="gap:8px">
-        <p><strong>Nome:</strong> ${esc(avaliado.nome)}</p>
-        <p><strong>NIS/NIT:</strong> ${esc(avaliado.nis_nit) || '—'}</p>
-        <p><strong>Sexo:</strong> ${avaliado.sexo === 'M' ? 'Masculino' : avaliado.sexo === 'F' ? 'Feminino' : '—'}</p>
-        <p><strong>Idade:</strong> ${avaliado.idade || '—'}</p>
-        <p><strong>Cor/Raça:</strong> ${esc(avaliado.cor_raca) || '—'}</p>
-        <p><strong>Tipo Impedimento:</strong> ${tiposStr}</p>
-        <p><strong>CID Causa:</strong> ${esc(avaliado.cid_causa) || '—'}</p>
-        <p><strong>CID Sequela:</strong> ${esc(avaliado.cid_sequela) || '—'}</p>
-        <p><strong>Data da Avaliação:</strong> ${avaliado.data_avaliacao ? new Date(avaliado.data_avaliacao).toLocaleDateString('pt-BR') : '—'}</p>
-        <p><strong>Local / APS:</strong> ${esc(avaliado.local_avaliacao) || '—'} ${avaliado.codigo_aps ? `(${esc(avaliado.codigo_aps)})` : ''}</p>
+  // 1. Dados do Avaliado
+  html += `
+    <div class="dados-avaliado-section">
+      <div class="section-title">Dados do Avaliado</div>
+      <div class="dados-grid">
+        <div><strong>Nome:</strong> ${esc(avaliado.nome)}</div>
+        <div><strong>NIS/NIT:</strong> ${esc(avaliado.nis_nit) || '—'}</div>
+        <div><strong>Sexo:</strong> ${avaliado.sexo === 'M' ? 'Feminino' : avaliado.sexo === 'F' ? 'Masculino' : '—'}</div>
+        <div><strong>Idade:</strong> ${avaliado.idade || '—'}</div>
+        <div><strong>Cor/Raça:</strong> ${esc(avaliado.cor_raca) || '—'}</div>
+        <div><strong>Tipo Impedimento:</strong> ${tiposStr}</div>
+        <div><strong>CID Causa:</strong> ${esc(avaliado.cid_causa) || '—'}</div>
+        <div><strong>CID Sequela:</strong> ${esc(avaliado.cid_sequela) || '—'}</div>
+        <div><strong>Data da Avaliação:</strong> ${avaliado.data_avaliacao ? new Date(avaliado.data_avaliacao).toLocaleDateString('pt-BR') : '—'}</div>
+        <div><strong>Local / APS:</strong> ${esc(avaliado.local_avaliacao) || '—'} ${avaliado.codigo_aps ? `(${esc(avaliado.codigo_aps)})` : ''}</div>
       </div>
     </div>
   `
 
-  // Por especialidade
+  // 2. Por especialidade
   Object.entries(resultadoPorEspecialidade).forEach(([esp, res]) => {
     const dominiosHTML = Object.entries(res.porDominio || {}).map(([cod, d]) =>
-      `<div class="dominio-resultado">
-        <span><strong>${esc(cod)}</strong> — ${esc(d.nome)}</span>
-        <span style="font-weight:600">${d.pontuacao} / ${d.maximo}</span>
+      `<div class="dominio-item">
+        <span>${esc(cod)} — ${esc(d.nome)}</span>
+        <span class="pontuacao">${d.pontuacao} / ${d.maximo}</span>
       </div>`
     ).join('')
 
     html += `
-      <div class="esp-resultado">
-        <h3>${esc(esp)} ${res.fuzzyAplicado ? '<span class="fuzzy-badge">Fuzzy aplicado</span>' : ''}</h3>
-        <p style="font-size:.85em;color:#555;margin-bottom:10px">Avaliador: <strong>${esc(res.nomeAvaliador)}</strong> &nbsp;|&nbsp; ${res.totalAtividades} atividades &nbsp;|&nbsp; Pontuação: <strong>${res.pontuacaoTotal} / ${res.pontuacaoMaxima}</strong></p>
-        ${dominiosHTML}
+      <div class="especialidade-section">
+        <div class="section-title">${esc(esp)}</div>
+        <div class="especialidade-info">
+          Avaliador: ${esc(res.nomeAvaliador)} | ${res.totalAtividades} atividades | Pontuação: <strong>${res.pontuacaoTotal} / ${res.pontuacaoMaxima}</strong>
+        </div>
+        <div class="dominios-list">
+          ${dominiosHTML}
+        </div>
       </div>
     `
   })
+
+  // 3. Resultado Final
+  const headerBg = classificacao === 'Leve' ? '#ff9800' : 
+                    classificacao === 'Moderada' ? '#ff5722' : 
+                    classificacao === 'Grave' ? '#f44336' : '#78909c'
+  html += `
+    <div class="resultado-final" style="background:${headerBg};color:white">
+      <div class="resultado-final-titulo">Resultado Final — IF-BrA</div>
+      <div class="resultado-final-score">${pontuacaoTotal.toLocaleString('pt-BR')}</div>
+      <div class="resultado-final-class">${esc(classificacao)}</div>
+      <div class="resultado-final-info">${totalAplicadores} aplicador(es) — ${totalAplicadores < 2 ? 'Incompleto' : 'Completo'}</div>
+    </div>
+  `
+
+  // 4. Barra de escala
+  html += `
+    <div class="escala-section">
+      <div class="escala-titulo">Posição na Escala LC 142/2013</div>
+      <div class="score-bar">
+        <div class="score-bar-grave" style="width:${graVePct}%;background:#f44336"></div>
+        <div class="score-bar-moderada" style="left:${graVePct}%;width:${(modPct - graVePct).toFixed(1)}%;background:#ff5722"></div>
+        <div class="score-bar-leve" style="left:${modPct}%;width:${(levePct - modPct).toFixed(1)}%;background:#ff9800"></div>
+        <div class="score-bar-insuficiente" style="left:${levePct}%;width:${(100 - levePct).toFixed(1)}%;background:#78909c"></div>
+        <div class="score-bar-marker" style="left:calc(${pct.toFixed(1)}% - 2px);background:#1a237e"></div>
+      </div>
+      <div class="score-bar-labels">
+        <span><span style="background:#f44336;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Grave</span> ≤ 5.739</span>
+        <span><span style="background:#ff5722;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Moderada</span> 5.740-6.354</span>
+        <span><span style="background:#ff9800;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Leve</span> 6.355-7.584</span>
+        <span><span style="background:#78909c;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Insuficiente</span> ≥ 7.585</span>
+      </div>
+    </div>
+  `
 
   html += `
     <div class="actions no-print">
