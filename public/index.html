@@ -215,9 +215,11 @@ tr:hover{background:#f5f5f5}
 /* Print */
 @media print{
   body{background:#fff;padding:0;margin:0}
-  .nav-tabs,.actions,.no-print,.btn{display:none!important}
-  .container{max-width:100%;padding:20px}
-  .section{display:block!important;box-shadow:none;padding:0}
+  .nav-tabs,.actions,.no-print,.btn,header{display:none!important}
+  .container{max-width:100%;padding:0}
+  /* Exibe SOMENTE a seção de resultados */
+  .section{display:none!important}
+  #resultados.section{display:block!important;box-shadow:none;padding:0}
   .dominio-body{display:block!important}
   .official-header{display:block!important}
   @page {
@@ -1157,9 +1159,13 @@ function renderResultado(data) {
 }
 
 function imprimirResultado() {
+  // Garantir que a seção de resultados esteja ativa
+  showSection('resultados')
+  // Mostrar o cabeçalho oficial
   document.getElementById('print-header').style.display = 'block'
   window.print()
   setTimeout(() => {
+    // Ocultar o cabeçalho após impressão
     document.getElementById('print-header').style.display = 'none'
   }, 500)
 }
