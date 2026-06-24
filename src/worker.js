@@ -283,7 +283,7 @@ export default {
           const vals = []
 
           const textFields = [
-            'nis_nit', 'sexo', 'cor_raca', 'cid_causa', 'cid_sequela', 'tipo_impedimento',
+            'nome', 'nis_nit', 'sexo', 'cor_raca', 'cid_causa', 'cid_sequela', 'tipo_impedimento',
             'data_inicio_impedimento', 'data_alteracao_impedimento', 'funcoes_corporais',
             'historia_clinica', 'historia_social', 'data_avaliacao', 'local_avaliacao', 'codigo_aps'
           ]
