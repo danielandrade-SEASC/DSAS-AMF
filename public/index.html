@@ -720,13 +720,6 @@ function toggleAccordion(id) {
   if (icon) icon.textContent = hidden ? '▲' : '▼'
 }
 
-function showAlerta(containerId, msg, tipo = 'success') {
-  const el = document.getElementById(containerId)
-  if (!el) return
-  el.innerHTML = `<div class="alert alert-${tipo}">${esc(msg)}</div>`
-  setTimeout(() => { el.innerHTML = '' }, 4000)
-}
-
 function classificacaoCss(cls) {
   const m = { 'Grave': 'grave', 'Moderada': 'moderada', 'Leve': 'leve' }
   return m[cls] || 'insuficiente'
