@@ -697,19 +697,35 @@ if (sessQuem) {
 }
 
 function limparFormNovo() {
-  state.avaliadoEmEdicao = null
-  document.getElementById('btn-salvar-avaliado').textContent = 'Cadastrar Avaliado'
-  ['n-nome','n-nis','n-idade','n-cid-causa','n-cid-sequela','n-data-inicio','n-data-alt','n-funcoes','n-historia-clinica','n-historia-social','n-data-aval','n-local']
-    .forEach(id => { const el = document.getElementById(id); if(el) el.value = '' })
-  const sexoEl = document.getElementById('n-sexo'); if(sexoEl) sexoEl.value = ''
-  const corEl = document.getElementById('n-cor'); if(corEl) corEl.value = ''
-  const semDiagEl = document.getElementById('n-sem-diag'); if(semDiagEl) semDiagEl.checked = false
-  const tipoCbs = document.querySelectorAll('.tipo-cb'); if(tipoCbs) tipoCbs.forEach(cb => { cb.checked = false })
-  const checkboxItems = document.querySelectorAll('.checkbox-item'); if(checkboxItems) checkboxItems.forEach(li => li.classList.remove('checked'))
-  ;['n-fuzzy-surdez','n-fuzzy-sozinho','n-fuzzy-cadeira','n-fuzzy-cego'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.checked = false
-  })
-  const alertaEl = document.getElementById('alerta-novo'); if(alertaEl) alertaEl.innerHTML = ''
+  try {
+    state.avaliadoEmEdicao = null
+    const btnSalvar = document.getElementById('btn-salvar-avaliado')
+    if (btnSalvar) btnSalvar.textContent = 'Cadastrar Avaliado'
+    const fieldIds = ['n-nome','n-nis','n-idade','n-cid-causa','n-cid-sequela','n-data-inicio','n-data-alt','n-funcoes','n-historia-clinica','n-historia-social','n-data-aval','n-local']
+    if (fieldIds && Array.isArray(fieldIds)) {
+      fieldIds.forEach(id => { 
+        const el = document.getElementById(id); 
+        if(el) el.value = '' 
+      })
+    }
+    const sexoEl = document.getElementById('n-sexo'); if(sexoEl) sexoEl.value = ''
+    const corEl = document.getElementById('n-cor'); if(corEl) corEl.value = ''
+    const semDiagEl = document.getElementById('n-sem-diag'); if(semDiagEl) semDiagEl.checked = false
+    const tipoCbs = document.querySelectorAll('.tipo-cb'); 
+    if (tipoCbs && tipoCbs.length > 0) tipoCbs.forEach(cb => { cb.checked = false })
+    const checkboxItems = document.querySelectorAll('.checkbox-item'); 
+    if (checkboxItems && checkboxItems.length > 0) checkboxItems.forEach(li => li.classList.remove('checked'))
+    const fuzzyIds = ['n-fuzzy-surdez','n-fuzzy-sozinho','n-fuzzy-cadeira','n-fuzzy-cego']
+    if (fuzzyIds && Array.isArray(fuzzyIds)) {
+      fuzzyIds.forEach(id => {
+        const el = document.getElementById(id); 
+        if(el) el.checked = false
+      })
+    }
+    const alertaEl = document.getElementById('alerta-novo'); if(alertaEl) alertaEl.innerHTML = ''
+  } catch (e) {
+    console.error('limparFormNovo error:', e)
+  }
 }
 
 async function loadAvaliadosNovo() {
@@ -759,79 +775,106 @@ function renderListaAvaliadosNovo(avaliados) {
 
 async function editarAvaliado(id) {
   try {
+    console.log('editarAvaliado id:', id)
     const avaliado = await fetch(`/api/avaliados/${id}`).then(r => r.json())
+    console.log('avaliado:', avaliado)
     if (!avaliado) throw new Error('Avaliado não encontrado')
     
     state.avaliadoEmEdicao = id
-    document.getElementById('btn-salvar-avaliado').textContent = 'Salvar Alterações'
-    document.getElementById('n-nome').value = avaliado.nome || ''
-    document.getElementById('n-nis').value = avaliado.nis_nit || ''
+    const btnSalvar = document.getElementById('btn-salvar-avaliado')
+    if (btnSalvar) btnSalvar.textContent = 'Salvar Alterações'
+    const nNome = document.getElementById('n-nome')
+    if (nNome) nNome.value = avaliado.nome || ''
+    const nNis = document.getElementById('n-nis')
+    if (nNis) nNis.value = avaliado.nis_nit || ''
     const sexoEl = document.getElementById('n-sexo'); if(sexoEl) sexoEl.value = avaliado.sexo || ''
     const idadeEl = document.getElementById('n-idade'); if(idadeEl) idadeEl.value = avaliado.idade || ''
     const corEl = document.getElementById('n-cor'); if(corEl) corEl.value = avaliado.cor_raca || ''
-    document.getElementById('n-cid-causa').value = avaliado.cid_causa || ''
-    document.getElementById('n-cid-sequela').value = avaliado.cid_sequela || ''
+    const nCidCausa = document.getElementById('n-cid-causa')
+    if (nCidCausa) nCidCausa.value = avaliado.cid_causa || ''
+    const nCidSequela = document.getElementById('n-cid-sequela')
+    if (nCidSequela) nCidSequela.value = avaliado.cid_sequela || ''
     const semDiagEl = document.getElementById('n-sem-diag'); if(semDiagEl) semDiagEl.checked = avaliado.sem_diagnostico_etiologico || false
-    document.getElementById('n-data-inicio').value = avaliado.data_inicio_impedimento || ''
-    document.getElementById('n-data-alt').value = avaliado.data_alteracao_impedimento || ''
-    document.getElementById('n-funcoes').value = avaliado.funcoes_corporais || ''
-    document.getElementById('n-historia-clinica').value = avaliado.historia_clinica || ''
-    document.getElementById('n-historia-social').value = avaliado.historia_social || ''
-    document.getElementById('n-data-aval').value = avaliado.data_avaliacao || ''
-    document.getElementById('n-local').value = avaliado.local_avaliacao || ''
+    const nDataInicio = document.getElementById('n-data-inicio')
+    if (nDataInicio) nDataInicio.value = avaliado.data_inicio_impedimento || ''
+    const nDataAlt = document.getElementById('n-data-alt')
+    if (nDataAlt) nDataAlt.value = avaliado.data_alteracao_impedimento || ''
+    const nFuncoes = document.getElementById('n-funcoes')
+    if (nFuncoes) nFuncoes.value = avaliado.funcoes_corporais || ''
+    const nHistoriaClinica = document.getElementById('n-historia-clinica')
+    if (nHistoriaClinica) nHistoriaClinica.value = avaliado.historia_clinica || ''
+    const nHistoriaSocial = document.getElementById('n-historia-social')
+    if (nHistoriaSocial) nHistoriaSocial.value = avaliado.historia_social || ''
+    const nDataAval = document.getElementById('n-data-aval')
+    if (nDataAval) nDataAval.value = avaliado.data_avaliacao || ''
+    const nLocal = document.getElementById('n-local')
+    if (nLocal) nLocal.value = avaliado.local_avaliacao || ''
     const fuzzySurdez = document.getElementById('n-fuzzy-surdez'); if(fuzzySurdez) fuzzySurdez.checked = avaliado.fuzzy_surdez_antes_6anos || false
     const fuzzySozinho = document.getElementById('n-fuzzy-sozinho'); if(fuzzySozinho) fuzzySozinho.checked = avaliado.fuzzy_nao_pode_sozinho || false
     const fuzzyCadeira = document.getElementById('n-fuzzy-cadeira'); if(fuzzyCadeira) fuzzyCadeira.checked = avaliado.fuzzy_cadeira_rodas || false
     const fuzzyCego = document.getElementById('n-fuzzy-cego'); if(fuzzyCego) fuzzyCego.checked = avaliado.fuzzy_cego_ao_nascer || false
     
-    const tipoCbs = document.querySelectorAll('.tipo-cb'); if(tipoCbs) tipoCbs.forEach(cb => {
-      cb.checked = avaliado.tipo_impedimento ? avaliado.tipo_impedimento.includes(cb.value) : false
-    })
-    const checkboxItems = document.querySelectorAll('.checkbox-item'); if(checkboxItems) checkboxItems.forEach(li => {
-      const input = li.querySelector('input')
-      if(input) li.classList.toggle('checked', input.checked)
-    })
+    const tipoCbs = document.querySelectorAll('.tipo-cb')
+    if (tipoCbs && tipoCbs.length > 0) {
+      tipoCbs.forEach(cb => {
+        cb.checked = avaliado.tipo_impedimento ? avaliado.tipo_impedimento.includes(cb.value) : false
+      })
+    }
+    const checkboxItems = document.querySelectorAll('.checkbox-item')
+    if (checkboxItems && checkboxItems.length > 0) {
+      checkboxItems.forEach(li => {
+        const input = li.querySelector('input')
+        if(input) li.classList.toggle('checked', input.checked)
+      })
+    }
   } catch (e) {
+    console.error('editarAvaliado error:', e)
     showAlerta('alerta-novo', 'Erro ao carregar avaliado', 'error')
   }
 }
 
 async function criarAvaliado() {
-  const nomeEl = document.getElementById('n-nome'); if(!nomeEl) return
-  const nome = nomeEl.value.trim()
-  if (!nome) { showAlerta('alerta-novo', 'Nome é obrigatório', 'error'); return }
-
-  const tipoCbs = document.querySelectorAll('.tipo-cb:checked')
-  const tipos = tipoCbs ? [...tipoCbs].map(cb => cb.value) : []
-  const idadeValEl = document.getElementById('n-idade')
-  const idadeVal = idadeValEl ? idadeValEl.value : ''
-  const idade = idadeVal === '' ? null : parseInt(idadeVal)
-
-  const data = {
-    nome,
-    nis_nit: document.getElementById('n-nis')?.value || null,
-    sexo: document.getElementById('n-sexo')?.value || null,
-    idade,
-    cor_raca: document.getElementById('n-cor')?.value || null,
-    cid_causa: document.getElementById('n-cid-causa')?.value || null,
-    cid_sequela: document.getElementById('n-cid-sequela')?.value || null,
-    sem_diagnostico_etiologico: document.getElementById('n-sem-diag')?.checked || false,
-    tipo_impedimento: tipos.length > 0 ? tipos.join(',') : null,
-    data_inicio_impedimento: document.getElementById('n-data-inicio')?.value || null,
-    data_alteracao_impedimento: document.getElementById('n-data-alt')?.value || null,
-    funcoes_corporais: document.getElementById('n-funcoes')?.value || null,
-    historia_clinica: document.getElementById('n-historia-clinica')?.value || null,
-    historia_social: document.getElementById('n-historia-social')?.value || null,
-    data_avaliacao: document.getElementById('n-data-aval')?.value || null,
-    codigo_aps: document.getElementById('n-aps')?.value || null,
-    local_avaliacao: document.getElementById('n-local')?.value || null,
-    fuzzy_surdez_antes_6anos: document.getElementById('n-fuzzy-surdez')?.checked || false,
-    fuzzy_nao_pode_sozinho: document.getElementById('n-fuzzy-sozinho')?.checked || false,
-    fuzzy_cadeira_rodas: document.getElementById('n-fuzzy-cadeira')?.checked || false,
-    fuzzy_cego_ao_nascer: document.getElementById('n-fuzzy-cego')?.checked || false
-  }
-
   try {
+    console.log('criarAvaliado called')
+    const nomeEl = document.getElementById('n-nome')
+    if(!nomeEl) return
+    const nome = nomeEl.value.trim()
+    if (!nome) { showAlerta('alerta-novo', 'Nome é obrigatório', 'error'); return }
+
+    const tipoCbs = document.querySelectorAll('.tipo-cb:checked')
+    let tipos = []
+    if (tipoCbs && tipoCbs.length > 0) {
+      tipos = [...tipoCbs].map(cb => cb.value).filter(v => v)
+    }
+    console.log('tipos:', tipos)
+    const idadeValEl = document.getElementById('n-idade')
+    const idadeVal = idadeValEl ? idadeValEl.value : ''
+    const idade = idadeVal === '' ? null : parseInt(idadeVal)
+
+    const data = {
+      nome,
+      nis_nit: document.getElementById('n-nis')?.value || null,
+      sexo: document.getElementById('n-sexo')?.value || null,
+      idade,
+      cor_raca: document.getElementById('n-cor')?.value || null,
+      cid_causa: document.getElementById('n-cid-causa')?.value || null,
+      cid_sequela: document.getElementById('n-cid-sequela')?.value || null,
+      sem_diagnostico_etiologico: document.getElementById('n-sem-diag')?.checked || false,
+      tipo_impedimento: tipos.length > 0 ? tipos.join(',') : null,
+      data_inicio_impedimento: document.getElementById('n-data-inicio')?.value || null,
+      data_alteracao_impedimento: document.getElementById('n-data-alt')?.value || null,
+      funcoes_corporais: document.getElementById('n-funcoes')?.value || null,
+      historia_clinica: document.getElementById('n-historia-clinica')?.value || null,
+      historia_social: document.getElementById('n-historia-social')?.value || null,
+      data_avaliacao: document.getElementById('n-data-aval')?.value || null,
+      codigo_aps: document.getElementById('n-aps')?.value || null,
+      local_avaliacao: document.getElementById('n-local')?.value || null,
+      fuzzy_surdez_antes_6anos: document.getElementById('n-fuzzy-surdez')?.checked || false,
+      fuzzy_nao_pode_sozinho: document.getElementById('n-fuzzy-sozinho')?.checked || false,
+      fuzzy_cadeira_rodas: document.getElementById('n-fuzzy-cadeira')?.checked || false,
+      fuzzy_cego_ao_nascer: document.getElementById('n-fuzzy-cego')?.checked || false
+    }
+
     let res, result
     if (state.avaliadoEmEdicao) {
       res = await fetch(`/api/avaliados/${state.avaliadoEmEdicao}`, {
@@ -856,6 +899,7 @@ async function criarAvaliado() {
     limparFormNovo()
     loadAvaliadosNovo()
   } catch (e) {
+    console.error('criarAvaliado error:', e)
     showAlerta('alerta-novo', e.message, 'error')
   }
 }
