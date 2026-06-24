@@ -838,8 +838,11 @@ function renderListaAvaliadosNovo(avaliados) {
       <td>${a.idade || '—'}</td>
       <td>${tipos}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-primary btn-sm" onclick="editarAvaliado(${a.id})" title="Editar" style="padding:6px 10px;">
+        <button class="btn btn-primary btn-sm" onclick="editarAvaliado(${a.id})" title="Editar" style="padding:6px 10px; margin-right: 4px;">
           ✏️
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="excluirAvaliado(${a.id}, '${esc(a.nome)}', 'novo')" title="Excluir" style="padding:6px 10px;">
+          🗑️
         </button>
       </td>
     </tr>`
@@ -1058,12 +1061,16 @@ function renderListaAvaliados(avaliados) {
   </table>`
 }
 
-async function excluirAvaliado(id, nome) {
+async function excluirAvaliado(id, nome, aba = 'avaliar') {
   if (!confirm(`Excluir avaliado "${nome}" e todas as suas avaliações?`)) return
   try {
     await fetch(`/api/avaliados/${id}`, { method: 'DELETE' })
     showAlerta(`Avaliado "${nome}" excluído`)
-    loadAvaliados()
+    if (aba === 'avaliar') {
+      loadAvaliados()
+    } else {
+      loadAvaliadosNovo()
+    }
   } catch { showAlerta('Erro ao excluir', 'error') }
 }
 
