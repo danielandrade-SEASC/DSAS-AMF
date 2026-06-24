@@ -668,20 +668,33 @@ function renderHomeDominios() {
 }
 
 // ─── Novo Avaliado ────────────────────────────────────────────────────────
-document.querySelectorAll('.tipo-cb').forEach(cb => {
-  cb.addEventListener('change', () => {
-    const checked = [...document.querySelectorAll('.tipo-cb:checked')]
-    if (checked.length > 2) { cb.checked = false; showAlerta('alerta-novo', 'Selecione no máximo 2 tipos de impedimento', 'error') }
-    document.querySelectorAll('.checkbox-item').forEach(li => {
-      li.classList.toggle('checked', li.querySelector('input').checked)
+const tipoCbs = document.querySelectorAll('.tipo-cb')
+if (tipoCbs && tipoCbs.length > 0) {
+  tipoCbs.forEach(cb => {
+    cb.addEventListener('change', () => {
+      const checked = document.querySelectorAll('.tipo-cb:checked')
+      if (checked && checked.length > 2) {
+        cb.checked = false
+        showAlerta('alerta-novo', 'Selecione no máximo 2 tipos de impedimento', 'error')
+      }
+      const checkboxItems = document.querySelectorAll('.checkbox-item')
+      if (checkboxItems) {
+        checkboxItems.forEach(li => {
+          const input = li.querySelector('input')
+          if (input) li.classList.toggle('checked', input.checked)
+        })
+      }
     })
   })
-})
+}
 
-document.getElementById('sess-quem').addEventListener('change', function() {
-  const grp = document.getElementById('sess-informante-grupo')
-  grp.style.display = (this.value === 'convivio_proximo' || this.value === 'outros') ? 'block' : 'none'
-})
+const sessQuem = document.getElementById('sess-quem')
+if (sessQuem) {
+  sessQuem.addEventListener('change', function() {
+    const grp = document.getElementById('sess-informante-grupo')
+    if (grp) grp.style.display = (this.value === 'convivio_proximo' || this.value === 'outros') ? 'block' : 'none'
+  })
+}
 
 function limparFormNovo() {
   state.avaliadoEmEdicao = null
@@ -701,23 +714,27 @@ function limparFormNovo() {
 
 async function loadAvaliadosNovo() {
   const container = document.getElementById('lista-pacientes-novo')
+  if (!container) return
   container.innerHTML = '<p style="color:#666;padding:12px">Carregando...</p>'
   try {
     const avaliados = await fetch('/api/avaliados').then(r => r.json())
-    state.avaliadosData = avaliados
-    renderListaAvaliadosNovo(avaliados)
-  } catch {
+    state.avaliadosData = Array.isArray(avaliados) ? avaliados : []
+    renderListaAvaliadosNovo(state.avaliadosData)
+  } catch (e) {
+    console.error(e)
     container.innerHTML = '<div class="alert alert-error">Erro ao carregar avaliados</div>'
   }
 }
 
 function renderListaAvaliadosNovo(avaliados) {
   const container = document.getElementById('lista-pacientes-novo')
-  if (!avaliados.length) {
+  if (!container) return
+  if (!Array.isArray(avaliados) || !avaliados.length) {
     container.innerHTML = '<div class="empty-state"><h3>Nenhum avaliado cadastrado</h3></div>'
     return
   }
   const tbody = avaliados.map(a => {
+    if (!a) return ''
     const tipos = a.tipo_impedimento ? a.tipo_impedimento.split(',').map(t =>
       `<span class="badge badge-ok" style="font-size:.75em">${esc(t)}</span>`
     ).join(' ') : '<span style="color:#999">—</span>'
