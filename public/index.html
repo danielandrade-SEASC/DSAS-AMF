@@ -677,49 +677,52 @@ document.getElementById('sess-quem').addEventListener('change', function() {
 })
 
 function limparFormNovo() {
-  ['n-nome','n-nis','n-idade','n-cid-causa','n-cid-sequela','n-data-inicio','n-data-alt','n-funcoes','n-historia-clinica','n-historia-social','n-data-aval','n-aps','n-local']
+  ['n-nome','n-nis','n-idade','n-cid-causa','n-cid-sequela','n-data-inicio','n-data-alt','n-funcoes','n-historia-clinica','n-historia-social','n-data-aval','n-local']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = '' })
-  document.getElementById('n-sexo').value = ''
-  document.getElementById('n-cor').value = ''
-  document.getElementById('n-sem-diag').checked = false
-  document.querySelectorAll('.tipo-cb').forEach(cb => { cb.checked = false })
-  document.querySelectorAll('.checkbox-item').forEach(li => li.classList.remove('checked'))
+  const sexoEl = document.getElementById('n-sexo'); if(sexoEl) sexoEl.value = ''
+  const corEl = document.getElementById('n-cor'); if(corEl) corEl.value = ''
+  const semDiagEl = document.getElementById('n-sem-diag'); if(semDiagEl) semDiagEl.checked = false
+  const tipoCbs = document.querySelectorAll('.tipo-cb'); if(tipoCbs) tipoCbs.forEach(cb => { cb.checked = false })
+  const checkboxItems = document.querySelectorAll('.checkbox-item'); if(checkboxItems) checkboxItems.forEach(li => li.classList.remove('checked'))
   ;['n-fuzzy-surdez','n-fuzzy-sozinho','n-fuzzy-cadeira','n-fuzzy-cego'].forEach(id => {
     const el = document.getElementById(id); if(el) el.checked = false
   })
-  document.getElementById('alerta-novo').innerHTML = ''
+  const alertaEl = document.getElementById('alerta-novo'); if(alertaEl) alertaEl.innerHTML = ''
 }
 
 async function criarAvaliado() {
-  const nome = document.getElementById('n-nome').value.trim()
+  const nomeEl = document.getElementById('n-nome'); if(!nomeEl) return
+  const nome = nomeEl.value.trim()
   if (!nome) { showAlerta('alerta-novo', 'Nome é obrigatório', 'error'); return }
 
-  const tipos = [...document.querySelectorAll('.tipo-cb:checked')].map(cb => cb.value)
-  const idadeVal = document.getElementById('n-idade').value
+  const tipoCbs = document.querySelectorAll('.tipo-cb:checked')
+  const tipos = tipoCbs ? [...tipoCbs].map(cb => cb.value) : []
+  const idadeValEl = document.getElementById('n-idade')
+  const idadeVal = idadeValEl ? idadeValEl.value : ''
   const idade = idadeVal === '' ? null : parseInt(idadeVal)
 
   const data = {
     nome,
-    nis_nit: document.getElementById('n-nis').value || null,
-    sexo: document.getElementById('n-sexo').value || null,
+    nis_nit: document.getElementById('n-nis')?.value || null,
+    sexo: document.getElementById('n-sexo')?.value || null,
     idade,
-    cor_raca: document.getElementById('n-cor').value || null,
-    cid_causa: document.getElementById('n-cid-causa').value || null,
-    cid_sequela: document.getElementById('n-cid-sequela').value || null,
-    sem_diagnostico_etiologico: document.getElementById('n-sem-diag').checked,
+    cor_raca: document.getElementById('n-cor')?.value || null,
+    cid_causa: document.getElementById('n-cid-causa')?.value || null,
+    cid_sequela: document.getElementById('n-cid-sequela')?.value || null,
+    sem_diagnostico_etiologico: document.getElementById('n-sem-diag')?.checked || false,
     tipo_impedimento: tipos.length > 0 ? tipos.join(',') : null,
-    data_inicio_impedimento: document.getElementById('n-data-inicio').value || null,
-    data_alteracao_impedimento: document.getElementById('n-data-alt').value || null,
-    funcoes_corporais: document.getElementById('n-funcoes').value || null,
-    historia_clinica: document.getElementById('n-historia-clinica').value || null,
-    historia_social: document.getElementById('n-historia-social').value || null,
-    data_avaliacao: document.getElementById('n-data-aval').value || null,
-    codigo_aps: document.getElementById('n-aps').value || null,
-    local_avaliacao: document.getElementById('n-local').value || null,
-    fuzzy_surdez_antes_6anos: document.getElementById('n-fuzzy-surdez').checked,
-    fuzzy_nao_pode_sozinho: document.getElementById('n-fuzzy-sozinho').checked,
-    fuzzy_cadeira_rodas: document.getElementById('n-fuzzy-cadeira').checked,
-    fuzzy_cego_ao_nascer: document.getElementById('n-fuzzy-cego').checked
+    data_inicio_impedimento: document.getElementById('n-data-inicio')?.value || null,
+    data_alteracao_impedimento: document.getElementById('n-data-alt')?.value || null,
+    funcoes_corporais: document.getElementById('n-funcoes')?.value || null,
+    historia_clinica: document.getElementById('n-historia-clinica')?.value || null,
+    historia_social: document.getElementById('n-historia-social')?.value || null,
+    data_avaliacao: document.getElementById('n-data-aval')?.value || null,
+    codigo_aps: document.getElementById('n-aps')?.value || null,
+    local_avaliacao: document.getElementById('n-local')?.value || null,
+    fuzzy_surdez_antes_6anos: document.getElementById('n-fuzzy-surdez')?.checked || false,
+    fuzzy_nao_pode_sozinho: document.getElementById('n-fuzzy-sozinho')?.checked || false,
+    fuzzy_cadeira_rodas: document.getElementById('n-fuzzy-cadeira')?.checked || false,
+    fuzzy_cego_ao_nascer: document.getElementById('n-fuzzy-cego')?.checked || false
   }
 
   try {
