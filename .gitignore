@@ -37,3 +37,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local test server
+server.cjs
