@@ -321,6 +321,7 @@ tr:hover{background:#f5f5f5}
 
   <nav class="nav-tabs">
     <button class="nav-tab active" onclick="showSection('home')">Início</button>
+    <button class="nav-tab" onclick="showSection('avaliados')">Avaliados Cadastrados</button>
     <button class="nav-tab" onclick="showSection('novo')">Novo Avaliado</button>
     <button class="nav-tab" onclick="showSection('avaliar')">Avaliar</button>
     <button class="nav-tab" onclick="showSection('resultados')">Resultados</button>
@@ -368,18 +369,16 @@ tr:hover{background:#f5f5f5}
     </div>
   </section>
 
+  <!-- AVALIADOS CADASTRADOS -->
+  <section id="avaliados" class="section">
+    <h3>Avaliados Cadastrados</h3>
+    <div id="lista-pacientes-novo"></div>
+  </section>
+
   <!-- NOVO AVALIADO -->
   <section id="novo" class="section">
-    <h3>Avaliados Cadastrados</h3>
-    <div class="actions" style="margin-bottom: 16px;">
-      <button class="btn btn-primary" onclick="abrirFormCadastro()">Novo Avaliado</button>
-    </div>
-    <div id="lista-pacientes-novo"></div>
-
-    <!-- Formulário de Cadastro (inicialmente oculto) -->
-    <div id="form-cadastro-container" style="display:none; margin-top: 32px;">
-      <h3 id="form-cadastro-titulo">Cadastro do Avaliado</h3>
-      <div id="alerta-novo"></div>
+    <h3 id="form-cadastro-titulo">Cadastro do Avaliado</h3>
+    <div id="alerta-novo"></div>
 
       <div class="accordion-header" onclick="toggleAccordion('acc-identificacao')">
         <span>1. Identificação do Avaliado</span><span id="acc-identificacao-icon">▼</span>
@@ -535,9 +534,8 @@ tr:hover{background:#f5f5f5}
 
       <div class="actions">
         <button class="btn btn-primary" id="btn-salvar-avaliado" onclick="criarAvaliado()">Cadastrar Avaliado</button>
-        <button class="btn btn-outline" onclick="fecharFormCadastro()">Cancelar</button>
+        <button class="btn btn-outline" onclick="showSection('avaliados')">Cancelar</button>
       </div>
-    </div>
   </section>
 
   <!-- AVALIAR -->
@@ -713,7 +711,8 @@ function showSection(id) {
   document.getElementById(id).classList.add('active')
   document.querySelector(`.nav-tab[onclick="showSection('${id}')"]`).classList.add('active')
   if (id === 'avaliar') loadAvaliados()
-  if (id === 'novo') loadAvaliadosNovo()
+  if (id === 'avaliados') loadAvaliadosNovo()
+  if (id === 'novo') limparFormNovo()
 }
 
 function toggleAccordion(id) {
@@ -917,27 +916,12 @@ async function editarAvaliado(id) {
       })
     }
 
-    // Abrir o formulário
-    abrirFormCadastro()
+    // Abrir a aba do formulário
+    showSection('novo')
   } catch (e) {
     console.error('editarAvaliado error:', e)
     showAlerta('Erro ao carregar avaliado', 'error')
   }
-}
-
-function abrirFormCadastro() {
-  const container = document.getElementById('form-cadastro-container')
-  if (container) container.style.display = 'block'
-  // Limpar o formulário se não for edição
-  if (!state.avaliadoEmEdicao) {
-    limparFormNovo()
-  }
-}
-
-function fecharFormCadastro() {
-  const container = document.getElementById('form-cadastro-container')
-  if (container) container.style.display = 'none'
-  limparFormNovo()
 }
 
 async function criarAvaliado() {
@@ -1003,7 +987,7 @@ async function criarAvaliado() {
       showAlerta(`Avaliado "${nome}" cadastrado com sucesso!`)
     }
     
-    fecharFormCadastro()
+    showSection('avaliados')
     loadAvaliadosNovo()
   } catch (e) {
     console.error('criarAvaliado error:', e)
