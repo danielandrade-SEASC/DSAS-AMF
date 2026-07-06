@@ -370,169 +370,173 @@ tr:hover{background:#f5f5f5}
 
   <!-- NOVO AVALIADO -->
   <section id="novo" class="section">
-    <h3>Cadastro do Avaliado</h3>
-    <div id="alerta-novo"></div>
+    <h3>Avaliados Cadastrados</h3>
+    <div class="actions" style="margin-bottom: 16px;">
+      <button class="btn btn-primary" onclick="abrirFormCadastro()">Novo Avaliado</button>
+    </div>
+    <div id="lista-pacientes-novo"></div>
 
-    <div class="accordion-header" onclick="toggleAccordion('acc-identificacao')">
-      <span>1. Identificação do Avaliado</span><span id="acc-identificacao-icon">▼</span>
-    </div>
-    <div id="acc-identificacao" class="accordion-body">
-      <div class="form-grid">
-        <div class="form-group" style="grid-column:1/-1">
-          <label>Nome Completo <span class="req">*</span></label>
-          <input type="text" id="n-nome" placeholder="Nome completo do avaliado">
-        </div>
-        <div class="form-group">
-          <label>Matrícula</label>
-          <input type="text" id="n-nis" placeholder="Digite a matrícula">
-        </div>
-        <div class="form-group">
-          <label>Sexo</label>
-          <select id="n-sexo">
-            <option value="">Selecione</option>
-            <option value="M">Masculino</option>
-            <option value="F">Feminino</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Idade (anos completos)</label>
-          <input type="number" id="n-idade" min="0" max="150">
-        </div>
-        <div class="form-group">
-          <label>Cor/Raça</label>
-          <select id="n-cor">
-            <option value="">Selecione</option>
-            <option value="Branca">Branca</option>
-            <option value="Preta">Preta</option>
-            <option value="Parda">Parda</option>
-            <option value="Amarela">Amarela (japonesa, chinesa, coreana...)</option>
-            <option value="Indígena">Indígena</option>
-          </select>
-        </div>
-      </div>
-    </div>
+    <!-- Formulário de Cadastro (inicialmente oculto) -->
+    <div id="form-cadastro-container" style="display:none; margin-top: 32px;">
+      <h3 id="form-cadastro-titulo">Cadastro do Avaliado</h3>
+      <div id="alerta-novo"></div>
 
-    <div class="accordion-header" onclick="toggleAccordion('acc-medico')">
-      <span>2. Dados Médicos <small style="font-weight:400">(Perito Médico)</small></span><span id="acc-medico-icon">▼</span>
-    </div>
-    <div id="acc-medico" class="accordion-body">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>CID </label>
-          <input type="text" id="n-cid-causa" placeholder="ex: G35">
-        </div>
-        <div class="form-group">
-          <label>CID </label>
-          <input type="text" id="n-cid-sequela" placeholder="ex: G83">
+      <div class="accordion-header" onclick="toggleAccordion('acc-identificacao')">
+        <span>1. Identificação do Avaliado</span><span id="acc-identificacao-icon">▼</span>
+      </div>
+      <div id="acc-identificacao" class="accordion-body">
+        <div class="form-grid">
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Nome Completo <span class="req">*</span></label>
+            <input type="text" id="n-nome" placeholder="Nome completo do avaliado">
+          </div>
+          <div class="form-group">
+            <label>Matrícula</label>
+            <input type="text" id="n-nis" placeholder="Digite a matrícula">
+          </div>
+          <div class="form-group">
+            <label>Sexo</label>
+            <select id="n-sexo">
+              <option value="">Selecione</option>
+              <option value="M">Masculino</option>
+              <option value="F">Feminino</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Idade (anos completos)</label>
+            <input type="number" id="n-idade" min="0" max="150">
+          </div>
+          <div class="form-group">
+            <label>Cor/Raça</label>
+            <select id="n-cor">
+              <option value="">Selecione</option>
+              <option value="Branca">Branca</option>
+              <option value="Preta">Preta</option>
+              <option value="Parda">Parda</option>
+              <option value="Amarela">Amarela (japonesa, chinesa, coreana...)</option>
+              <option value="Indígena">Indígena</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="n-sem-diag" style="width:16px;height:16px;margin-right:6px">
-          Sem diagnóstico etiológico
-        </label>
+
+      <div class="accordion-header" onclick="toggleAccordion('acc-medico')">
+        <span>2. Dados Médicos <small style="font-weight:400">(Perito Médico)</small></span><span id="acc-medico-icon">▼</span>
       </div>
-      <div class="form-group">
-        <label>Tipo de Impedimento <small style="font-weight:400">(máx. 2)</small></label>
-        <div class="checkbox-group" id="tipo-impedimento-group">
-          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Auditiva"> Auditiva</label>
-          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Intelectual/Cognitiva"> Intelectual / Cognitiva / Mental</label>
-          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Fisica/Motora"> Física / Motora</label>
-          <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Visual"> Visual</label>
+      <div id="acc-medico" class="accordion-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>CID </label>
+            <input type="text" id="n-cid-causa" placeholder="ex: G35">
+          </div>
+          <div class="form-group">
+            <label>CID </label>
+            <input type="text" id="n-cid-sequela" placeholder="ex: G83">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="n-sem-diag" style="width:16px;height:16px;margin-right:6px">
+            Sem diagnóstico etiológico
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Impedimento <small style="font-weight:400">(máx. 2)</small></label>
+          <div class="checkbox-group" id="tipo-impedimento-group">
+            <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Auditiva"> Auditiva</label>
+            <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Intelectual/Cognitiva"> Intelectual / Cognitiva / Mental</label>
+            <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Fisica/Motora"> Física / Motora</label>
+            <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Visual"> Visual</label>
 <!-- <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Mental"> Mental</label> -->
+          </div>
         </div>
-      </div>
-      <div class="form-grid">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Data de Início do Impedimento</label>
+            <input type="date" id="n-data-inicio">
+          </div>
+          <div class="form-group">
+            <label>Data de Alteração do Impedimento</label>
+            <input type="date" id="n-data-alt">
+          </div>
+        </div>
         <div class="form-group">
-          <label>Data de Início do Impedimento</label>
-          <input type="date" id="n-data-inicio">
+          <label>Funções Corporais Acometidas</label>
+          <textarea id="n-funcoes" placeholder="Descreva as funções corporais acometidas (Mentais, Sensoriais, Voz/Fala, Cardiovascular, Digestivo, Geniturinário, Neuromusculoesquelético, Pele...)"></textarea>
         </div>
         <div class="form-group">
-          <label>Data de Alteração do Impedimento</label>
-          <input type="date" id="n-data-alt">
+          <label>História Clínica <small style="font-weight:400">(Perito Médico)</small></label>
+          <textarea id="n-historia-clinica" placeholder="Resumo dos principais elementos clínicos relevantes"></textarea>
         </div>
       </div>
-      <div class="form-group">
-        <label>Funções Corporais Acometidas</label>
-        <textarea id="n-funcoes" placeholder="Descreva as funções corporais acometidas (Mentais, Sensoriais, Voz/Fala, Cardiovascular, Digestivo, Geniturinário, Neuromusculoesquelético, Pele...)"></textarea>
-      </div>
-      <div class="form-group">
-        <label>História Clínica <small style="font-weight:400">(Perito Médico)</small></label>
-        <textarea id="n-historia-clinica" placeholder="Resumo dos principais elementos clínicos relevantes"></textarea>
-      </div>
-    </div>
 
-    <div class="accordion-header" onclick="toggleAccordion('acc-social')">
-      <span>3. Dados Sociais <small style="font-weight:400">(Assistente Social)</small></span><span id="acc-social-icon">▼</span>
-    </div>
-    <div id="acc-social" class="accordion-body">
-      <div class="form-group">
-        <label>História Social <small style="font-weight:400">(Assistente Social)</small></label>
-        <textarea id="n-historia-social" placeholder="Resumo dos principais elementos sociais relevantes"></textarea>
+      <div class="accordion-header" onclick="toggleAccordion('acc-social')">
+        <span>3. Dados Sociais <small style="font-weight:400">(Assistente Social)</small></span><span id="acc-social-icon">▼</span>
       </div>
-    </div>
-
-    <div class="accordion-header" onclick="toggleAccordion('acc-avaliacao')">
-      <span>4. Identificação da Avaliação</span><span id="acc-avaliacao-icon">▼</span>
-    </div>
-    <div id="acc-avaliacao" class="accordion-body">
-      <div class="form-grid">
+      <div id="acc-social" class="accordion-body">
         <div class="form-group">
-          <label>Data da Avaliação</label>
-          <input type="date" id="n-data-aval">
+          <label>História Social <small style="font-weight:400">(Assistente Social)</small></label>
+          <textarea id="n-historia-social" placeholder="Resumo dos principais elementos sociais relevantes"></textarea>
         </div>
+      </div>
+
+      <div class="accordion-header" onclick="toggleAccordion('acc-avaliacao')">
+        <span>4. Identificação da Avaliação</span><span id="acc-avaliacao-icon">▼</span>
+      </div>
+      <div id="acc-avaliacao" class="accordion-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Data da Avaliação</label>
+            <input type="date" id="n-data-aval">
+          </div>
 <!--
-        <div class="form-group">
-          <label>Código da APS</label>
-          <input type="text" id="n-aps" placeholder="Código da Agência">
-        </div>
+          <div class="form-group">
+            <label>Código da APS</label>
+            <input type="text" id="n-aps" placeholder="Código da Agência">
+          </div>
 -->        
-        <div class="form-group">
-          <label>Local da Avaliação</label>
-          <input type="text" id="n-local" placeholder="Nome da instituição / município / estado">
+          <div class="form-group">
+            <label>Local da Avaliação</label>
+            <input type="text" id="n-local" placeholder="Nome da instituição / município / estado">
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="accordion-header" onclick="toggleAccordion('acc-fuzzy')">
-      <span>5. Perguntas Emblemáticas (Modelo Fuzzy)</span><span id="acc-fuzzy-icon">▼</span>
-    </div>
-    <div id="acc-fuzzy" class="accordion-body">
-      <div class="alert alert-info">Responda somente as perguntas pertinentes ao tipo de impedimento identificado. As respostas afirmativas ativam o ajuste automático Fuzzy no cálculo do resultado.</div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="n-fuzzy-surdez" style="width:16px;height:16px;margin-right:8px">
-          <strong>[Auditiva]</strong> A surdez ocorreu antes dos 6 anos?
-        </label>
+      <div class="accordion-header" onclick="toggleAccordion('acc-fuzzy')">
+        <span>5. Perguntas Emblemáticas (Modelo Fuzzy)</span><span id="acc-fuzzy-icon">▼</span>
       </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="n-fuzzy-sozinho" style="width:16px;height:16px;margin-right:8px">
-          <strong>[Intelectual/Cognitiva ou Mental]</strong> Não pode ficar sozinho em segurança?
-        </label>
+      <div id="acc-fuzzy" class="accordion-body">
+        <div class="alert alert-info">Responda somente as perguntas pertinentes ao tipo de impedimento identificado. As respostas afirmativas ativam o ajuste automático Fuzzy no cálculo do resultado.</div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="n-fuzzy-surdez" style="width:16px;height:16px;margin-right:8px">
+            <strong>[Auditiva]</strong> A surdez ocorreu antes dos 6 anos?
+          </label>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="n-fuzzy-sozinho" style="width:16px;height:16px;margin-right:8px">
+            <strong>[Intelectual/Cognitiva ou Mental]</strong> Não pode ficar sozinho em segurança?
+          </label>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="n-fuzzy-cadeira" style="width:16px;height:16px;margin-right:8px">
+            <strong>[Física/Motora]</strong> Desloca-se exclusivamente em cadeira de rodas?
+          </label>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="n-fuzzy-cego" style="width:16px;height:16px;margin-right:8px">
+            <strong>[Visual]</strong> A pessoa já não enxerga ao nascer?
+          </label>
+        </div>
       </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="n-fuzzy-cadeira" style="width:16px;height:16px;margin-right:8px">
-          <strong>[Física/Motora]</strong> Desloca-se exclusivamente em cadeira de rodas?
-        </label>
-      </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="n-fuzzy-cego" style="width:16px;height:16px;margin-right:8px">
-          <strong>[Visual]</strong> A pessoa já não enxerga ao nascer?
-        </label>
-      </div>
-    </div>
 
-    <div class="actions">
-      <button class="btn btn-primary" id="btn-salvar-avaliado" onclick="criarAvaliado()">Cadastrar Avaliado</button>
-      <button class="btn btn-outline" onclick="limparFormNovo()">Limpar</button>
-    </div>
-    <!-- Lista de avaliados para edição -->
-    <div style="margin-top: 32px;">
-      <h3>Avaliados Cadastrados</h3>
-      <div id="lista-pacientes-novo"></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-salvar-avaliado" onclick="criarAvaliado()">Cadastrar Avaliado</button>
+        <button class="btn btn-outline" onclick="fecharFormCadastro()">Cancelar</button>
+      </div>
     </div>
   </section>
 
@@ -778,6 +782,8 @@ function limparFormNovo() {
     state.avaliadoEmEdicao = null
     const btnSalvar = document.getElementById('btn-salvar-avaliado')
     if (btnSalvar) btnSalvar.textContent = 'Cadastrar Avaliado'
+    const titulo = document.getElementById('form-cadastro-titulo')
+    if (titulo) titulo.textContent = 'Cadastro do Avaliado'
     const fieldIds = ['n-nome','n-nis','n-idade','n-cid-causa','n-cid-sequela','n-data-inicio','n-data-alt','n-funcoes','n-historia-clinica','n-historia-social','n-data-aval','n-local']
     if (fieldIds && Array.isArray(fieldIds)) {
       fieldIds.forEach(id => { 
@@ -863,6 +869,9 @@ async function editarAvaliado(id) {
     state.avaliadoEmEdicao = id
     const btnSalvar = document.getElementById('btn-salvar-avaliado')
     if (btnSalvar) btnSalvar.textContent = 'Salvar Alterações'
+    const titulo = document.getElementById('form-cadastro-titulo')
+    if (titulo) titulo.textContent = 'Editar Avaliado'
+    
     const nNome = document.getElementById('n-nome')
     if (nNome) nNome.value = avaliado.nome || ''
     const nNis = document.getElementById('n-nis')
@@ -907,10 +916,28 @@ async function editarAvaliado(id) {
         if(input) li.classList.toggle('checked', input.checked)
       })
     }
+
+    // Abrir o formulário
+    abrirFormCadastro()
   } catch (e) {
     console.error('editarAvaliado error:', e)
     showAlerta('Erro ao carregar avaliado', 'error')
   }
+}
+
+function abrirFormCadastro() {
+  const container = document.getElementById('form-cadastro-container')
+  if (container) container.style.display = 'block'
+  // Limpar o formulário se não for edição
+  if (!state.avaliadoEmEdicao) {
+    limparFormNovo()
+  }
+}
+
+function fecharFormCadastro() {
+  const container = document.getElementById('form-cadastro-container')
+  if (container) container.style.display = 'none'
+  limparFormNovo()
 }
 
 async function criarAvaliado() {
@@ -976,7 +1003,7 @@ async function criarAvaliado() {
       showAlerta(`Avaliado "${nome}" cadastrado com sucesso!`)
     }
     
-    limparFormNovo()
+    fecharFormCadastro()
     loadAvaliadosNovo()
   } catch (e) {
     console.error('criarAvaliado error:', e)
