@@ -108,29 +108,25 @@ function aplicarFuzzy(avaliado, avaliacoes) {
     const codigos = fuzzyDominios[tipo] || []
 
     const emblematicoAtivo =
-      (tipo === 'Auditiva' && !!avaliado.fuzzy_surdez_antes_6anos) ||
-      ((tipo === 'Intelectual/Cognitiva' || tipo === 'Mental') && !!avaliado.fuzzy_nao_pode_sozinho) ||
-      (tipo === 'Fisica/Motora' && !!avaliado.fuzzy_cadeira_rodas) ||
-      (tipo === 'Visual' && !!avaliado.fuzzy_cego_ao_nascer)
-
-    // REGRA OFICIAL: Fuzzy SÓ é aplicado quando a SITUAÇÃO EMBLEMÁTICA for constatada (checkbox marcado)
-    if (!emblematicoAtivo) continue
+      (tipo === 'Auditiva' && avaliado.fuzzy_surdez_antes_6anos) ||
+      ((tipo === 'Intelectual/Cognitiva' || tipo === 'Mental') && avaliado.fuzzy_nao_pode_sozinho) ||
+      (tipo === 'Fisica/Motora' && avaliado.fuzzy_cadeira_rodas) ||
+      (tipo === 'Visual' && avaliado.fuzzy_cego_ao_nascer)
 
     for (const cod of codigos) {
       const ativsNoDominio = resultado.filter(a => a.dominio === cod)
       if (ativsNoDominio.length === 0) continue
 
-      // Encontra a MENOR nota atribuída no domínio
-      const pontuacoes = ativsNoDominio.map(a => Number(a.pontuacao) || 0)
+      const pontuacoes = ativsNoDominio.map(a => a.pontuacao)
       const minPontuacao = Math.min(...pontuacoes)
+      const tem25ou50 = pontuacoes.some(p => p <= 50)
+      const todos75 = pontuacoes.every(p => p === 75)
 
-      // Aplica a MENOR nota a TODAS as atividades do domínio
-      // - Se tudo 100: min=100 => permanece 100 (sem alteração)
-      // - Se tudo 75:  min=75  => permanece 75
-      // - Se misturado: aplica a menor a todos
-      resultado = resultado.map(a =>
-        a.dominio === cod ? { ...a, pontuacao: minPontuacao } : a
-      )
+      if (emblematicoAtivo || tem25ou50 || todos75) {
+        resultado = resultado.map(a =>
+          a.dominio === cod ? { ...a, pontuacao: minPontuacao } : a
+        )
+      }
     }
   }
 
