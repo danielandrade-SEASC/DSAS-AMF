@@ -1410,6 +1410,17 @@ async function verResultado(id) {
     const data = await res.json()
     if (!res.ok) { showAlerta(data.error || 'Erro ao carregar resultado', 'error'); return }
     if (data.mensagem && !data.resultadoCombinado) { showAlerta(data.mensagem, 'error'); return }
+    if (data.avaliacaoCompleta === false) {
+      const linhas = (data.incompletudes || []).map(l => `• ${l}`).join('\n')
+      showAlerta(
+        'Atenção — Avaliação Incompleta!\n\n' +
+        'O resultado não pode ser considerado oficial pois existem questões sem preenchimento:\n\n' +
+        (linhas || '• Faltam dados em uma ou mais especialidades.') +
+        '\n\n' +
+        'O Modelo Fuzzy NÃO será aplicado enquanto a avaliação não estiver 100% preenchida.',
+        'error'
+      )
+    }
     renderResultado(data)
     showSection('resultados')
   } catch {
@@ -1418,7 +1429,7 @@ async function verResultado(id) {
 }
 
 function renderResultado(data) {
-  const { avaliado, resultadoPorEspecialidade, pontuacaoTotal, classificacao, totalAplicadores, observacao } = data
+  const { avaliado, resultadoPorEspecialidade, pontuacaoTotal, classificacao, totalAplicadores, observacao, avaliacaoCompleta, incompletudes } = data
 
   const cls = classificacaoCss(classificacao)
   const MIN = 2050, MAX = 8200
@@ -1434,6 +1445,29 @@ function renderResultado(data) {
     : '—'
 
   let html = ''
+
+  // 0. AVISO DE AVALIAÇÃO INCOMPLETA (topo, destacado)
+  if (avaliacaoCompleta === false) {
+    html += `
+      <div style="background:#ffebee;border:1px solid #ef5350;border-radius:10px;padding:16px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-weight:700;color:#c62828;font-size:1.15em">⚠️ Avaliação Incompleta — Resultado Não Oficial</div>
+        </div>
+        <div style="font-size:.95em;color:#b71c1c">
+          ${observacao ? `<div style="margin-bottom:8px"><strong>${esc(observacao)}</strong></div>` : ''}
+          ${incompletudes && incompletudes.length > 0 ? `
+            <div style="margin-bottom:8px"><strong>Pendências detectadas:</strong></div>
+            <ul style="margin:0 0 8px 20px;padding:0">
+              ${incompletudes.map(i => `<li>${esc(i)}</li>`).join('')}
+            </ul>
+          ` : ''}
+          <div style="margin-top:10px;font-size:.9em;color:#c62828;background:#ffcdd2;border-radius:6px;padding:8px;border:1px dashed #e53935">
+            🚫 O Modelo Linguístico Fuzzy <strong>NÃO</strong> foi aplicado. Volte à aba "Avaliar", preencha todas as 41 atividades de <strong>cada especialidade</strong> (Perito Médico + Assistente Social) e, em seguida, consulte o resultado novamente.
+          </div>
+        </div>
+      </div>
+    `
+  }
 
   // 1. Dados do Avaliado
   html += `
@@ -1480,16 +1514,25 @@ function renderResultado(data) {
     ).join('')
     const fuzzyBadge = res.fuzzyAplicado
       ? `<span class="fuzzy-badge" title="Ajuste Fuzzy aplicado: menor nota do domínio atribuída a todas as atividades">✓ FUZZY APLICADO</span>`
-      : ''
-
+      : (res.fuzzyBloqueadoPorIncompletude
+         ? `<span style="background:#ef5350;color:white;padding:3px 10px;border-radius:20px;font-size:.8em;font-weight:600" title="Fuzzy NÃO foi aplicado: existem atividades sem preenchimento nesta especialidade">🚫 FUZZY BLOQUEADO</span>`
+         : (res.completa
+            ? ''
+            : `<span style="background:#fb8c00;color:white;padding:3px 10px;border-radius:20px;font-size:.8em;font-weight:600" title="Esta especialidade ainda não possui todas as 41 atividades preenchidas">⚠️ INCOMPLETA</span>`))
+    const statusCor = res.completa ? '#2e7d32' : '#ef6c00'
     html += `
       <div class="especialidade-section">
-        <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <span>${esc(esp)}</span>
-          ${fuzzyBadge}
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            ${fuzzyBadge}
+            <span style="background:#fff;color:${statusCor};border:1px solid ${statusCor};padding:3px 10px;border-radius:20px;font-size:.8em;font-weight:600">
+              ${res.completa ? '✓ Completa' : `◷ ${res.totalAtividades}/${res.totalAtividadesEsperadas} ativ.`}
+            </span>
+          </div>
         </div>
         <div class="especialidade-info">
-          Avaliador: ${esc(res.nomeAvaliador)} | ${res.totalAtividades} atividades | Pontuação: <strong>${res.pontuacaoTotal} / ${res.pontuacaoMaxima}</strong>
+          Avaliador: ${esc(res.nomeAvaliador)} | ${res.totalAtividades} de ${res.totalAtividadesEsperadas} atividades | Pontuação: <strong>${res.pontuacaoTotal} / ${res.pontuacaoMaximaPossivel}</strong>
         </div>
         <div class="dominios-list">
           ${dominiosHTML}
@@ -1498,8 +1541,8 @@ function renderResultado(data) {
     `
   })
 
-  // 2a. Bloco Fuzzy (se houver situação emblemática ativa)
-  if (fuzzyGeral) {
+  // 2a. Bloco Fuzzy (se houver situação emblemática ativa E avaliação completa)
+  if (fuzzyGeral && avaliacaoCompleta) {
     html += `
       <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:16px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -1520,45 +1563,67 @@ function renderResultado(data) {
         </div>
       </div>
     `
+  } else if (fuzzyGeral && !avaliacaoCompleta) {
+    html += `
+      <div style="background:#fff3e0;border:1px solid #ffb74d;border-radius:10px;padding:16px;margin-bottom:16px">
+        <div style="font-weight:700;color:#e65100;font-size:1.05em;margin-bottom:8px">⚙️ Fuzzy — Situação Emblemática Detectada (Aplicação Pendente)</div>
+        <div style="font-size:.95em;color:#bf360c">
+          <div style="margin-bottom:8px">Situações emblemáticas marcadas: ${fuzzyAtivoDetalhes.map(esc).join(', ')}.</div>
+          <div><strong>O Fuzzy não foi aplicado</strong> porque ainda existem atividades sem preenchimento. Finalize a avaliação (41/41 atividades por especialidade + 2 aplicadores) para que o ajuste Fuzzy seja processado.</div>
+        </div>
+      </div>
+    `
   }
 
   // 3. Resultado Final
-  const headerBg = classificacao === 'Leve' ? '#ff9800' : 
-                    classificacao === 'Moderada' ? '#ff5722' : 
-                    classificacao === 'Grave' ? '#f44336' : '#78909c'
+  const classificacaoExibir = classificacao || 'Avaliação Incompleta'
+  const headerBg = avaliacaoCompleta
+    ? (classificacao === 'Leve' ? '#ff9800' :
+       classificacao === 'Moderada' ? '#ff5722' :
+       classificacao === 'Grave' ? '#f44336' : '#78909c')
+    : '#78909c'
   html += `
     <div class="resultado-final" style="background:${headerBg};color:white">
-      <div class="resultado-final-titulo">Resultado Final — IF-BrA</div>
+      <div class="resultado-final-titulo">${avaliacaoCompleta ? 'Resultado Final — IF-BrA' : 'Resultado Parcial — Avaliação Incompleta'}</div>
       <div class="resultado-final-score">${pontuacaoTotal.toLocaleString('pt-BR')}</div>
-      <div class="resultado-final-class">${esc(classificacao)}</div>
-      <div class="resultado-final-info">${totalAplicadores} aplicador(es) — ${totalAplicadores < 2 ? 'Incompleto' : 'Completo'}</div>
+      <div class="resultado-final-class">${esc(classificacaoExibir)}</div>
+      <div class="resultado-final-info">${totalAplicadores} aplicador(es) — ${avaliacaoCompleta ? 'Completo' : 'Incompleto'}</div>
     </div>
   `
 
-  // 4. Barra de escala
-  html += `
-    <div class="escala-section">
-      <div class="escala-titulo">Posição na Escala LC 142/2013</div>
-      <div class="score-bar">
-        <div class="score-bar-grave" style="width:${graVePct}%;background:#f44336"></div>
-        <div class="score-bar-moderada" style="left:${graVePct}%;width:${(modPct - graVePct).toFixed(1)}%;background:#ff5722"></div>
-        <div class="score-bar-leve" style="left:${modPct}%;width:${(levePct - modPct).toFixed(1)}%;background:#ff9800"></div>
-        <div class="score-bar-insuficiente" style="left:${levePct}%;width:${(100 - levePct).toFixed(1)}%;background:#78909c"></div>
-        <div class="score-bar-marker" style="left:calc(${pct.toFixed(1)}% - 2px);background:#1a237e"></div>
+  // 4. Barra de escala (só exibe se avaliação estiver COMPLETA)
+  if (avaliacaoCompleta) {
+    html += `
+      <div class="escala-section">
+        <div class="escala-titulo">Posição na Escala LC 142/2013</div>
+        <div class="score-bar">
+          <div class="score-bar-grave" style="width:${graVePct}%;background:#f44336"></div>
+          <div class="score-bar-moderada" style="left:${graVePct}%;width:${(modPct - graVePct).toFixed(1)}%;background:#ff5722"></div>
+          <div class="score-bar-leve" style="left:${modPct}%;width:${(levePct - modPct).toFixed(1)}%;background:#ff9800"></div>
+          <div class="score-bar-insuficiente" style="left:${levePct}%;width:${(100 - levePct).toFixed(1)}%;background:#78909c"></div>
+          <div class="score-bar-marker" style="left:calc(${pct.toFixed(1)}% - 2px);background:#1a237e"></div>
+        </div>
+        <div class="score-bar-labels">
+          <span><span style="background:#f44336;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Grave</span> ≤ 5.739</span>
+          <span><span style="background:#ff5722;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Moderada</span> 5.740-6.354</span>
+          <span><span style="background:#ff9800;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Leve</span> 6.355-7.584</span>
+          <span><span style="background:#78909c;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Insuficiente</span> ≥ 7.585</span>
+        </div>
       </div>
-      <div class="score-bar-labels">
-        <span><span style="background:#f44336;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Grave</span> ≤ 5.739</span>
-        <span><span style="background:#ff5722;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Moderada</span> 5.740-6.354</span>
-        <span><span style="background:#ff9800;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Leve</span> 6.355-7.584</span>
-        <span><span style="background:#78909c;color:white;padding:2px 6px;border-radius:4px;font-size:.7em">Insuficiente</span> ≥ 7.585</span>
+    `
+  } else {
+    html += `
+      <div class="escala-section no-print" style="text-align:center;padding:20px;background:#f5f5f5;border-radius:10px;border:1px dashed #9e9e9e">
+        <div style="font-weight:600;color:#616161;margin-bottom:8px">📏 Escala LC 142/2013 indisponível</div>
+        <div style="font-size:.9em;color:#757575">Preencha todas as 41 atividades de ambas as especialidades (Perito Médico + Assistente Social) para visualizar a classificação oficial e a posição na escala.</div>
       </div>
-    </div>
-  `
+    `
+  }
 
   html += `
     <div class="actions no-print">
-      <button class="btn btn-primary" onclick="imprimirResultado()">Imprimir</button>
-      <button class="btn btn-outline" onclick="showSection('avaliar')">← Voltar</button>
+      ${avaliacaoCompleta ? `<button class="btn btn-primary" onclick="imprimirResultado()">Imprimir</button>` : `<button class="btn btn-outline" style="background:#fff3e0;color:#e65100;border-color:#ffb74d" disabled title="Avaliação incompleta: impressão bloqueada">Imprimir (Avaliação Incompleta)</button>`}
+      <button class="btn btn-outline" onclick="showSection('avaliar')">← Voltar para Avaliação</button>
     </div>
   `
 

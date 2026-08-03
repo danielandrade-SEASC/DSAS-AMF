@@ -410,14 +410,35 @@ export default {
             })
           }
 
+          const TOTAL_ATIVIDADES_ESPERADAS = 41
           const resultadoPorEspecialidade = {}
           let pontuacaoTotalCombinada = 0
+          const incompletudes = []
 
           for (const esp of especialidades) {
             const avaliacoesEsp = avaliacoesParsed.filter(a => a.especialidade === esp)
-            if (avaliacoesEsp.length === 0) continue
+            if (avaliacoesEsp.length === 0) {
+              incompletudes.push(`${esp}: nenhuma atividade preenchida (faltam ${TOTAL_ATIVIDADES_ESPERADAS} de ${TOTAL_ATIVIDADES_ESPERADAS})`)
+              continue
+            }
 
-            const avaliacoesCorrigidas = aplicarFuzzy(avaliadoParsed, avaliacoesEsp)
+            const completa = avaliacoesEsp.length === TOTAL_ATIVIDADES_ESPERADAS
+            if (!completa) {
+              const faltam = TOTAL_ATIVIDADES_ESPERADAS - avaliacoesEsp.length
+              incompletudes.push(`${esp}: ${avaliacoesEsp.length} de ${TOTAL_ATIVIDADES_ESPERADAS} atividades preenchidas (faltam ${faltam})`)
+            }
+
+            // Fuzzy SÓ é aplicado se TODAS as 41 atividades da especialidade estiverem preenchidas
+            let avaliacoesCorrigidas = avaliacoesEsp
+            let fuzzyAplicado = false
+            let fuzzyBloqueadoPorIncompletude = false
+            if (completa) {
+              avaliacoesCorrigidas = aplicarFuzzy(avaliadoParsed, avaliacoesEsp)
+              fuzzyAplicado = JSON.stringify(avaliacoesEsp) !== JSON.stringify(avaliacoesCorrigidas)
+            } else {
+              fuzzyBloqueadoPorIncompletude = true
+            }
+
             const soma = avaliacoesCorrigidas.reduce((s, a) => s + a.pontuacao, 0)
             pontuacaoTotalCombinada += soma
 
@@ -425,17 +446,32 @@ export default {
             resultadoPorEspecialidade[esp] = {
               pontuacaoTotal: soma,
               pontuacaoMaxima: avaliacoesEsp.length * 100,
+              pontuacaoMaximaPossivel: TOTAL_ATIVIDADES_ESPERADAS * 100,
               porDominio: calcularPorDominio(avaliacoesCorrigidas),
               nomeAvaliador: sessao?.nome_avaliador || avaliacoesEsp[0].nome_avaliador,
               totalAtividades: avaliacoesEsp.length,
-              fuzzyAplicado: JSON.stringify(avaliacoesEsp) !== JSON.stringify(avaliacoesCorrigidas)
+              totalAtividadesEsperadas: TOTAL_ATIVIDADES_ESPERADAS,
+              completa,
+              fuzzyAplicado,
+              fuzzyBloqueadoPorIncompletude
             }
           }
 
-          const totalAtividades = 41
           const totalAplicadores = Object.keys(resultadoPorEspecialidade).length
-          const pontuacaoMaximaPossivel = totalAtividades * 100 * totalAplicadores
-          const pontuacaoMinimaPossivel = totalAtividades * 25 * totalAplicadores
+          const todosAplicadoresPresentes = totalAplicadores >= 2
+          const todasEspecialidadesCompletas = Object.values(resultadoPorEspecialidade).every(r => r.completa)
+          const avaliacaoCompleta = todosAplicadoresPresentes && todasEspecialidadesCompletas
+
+          const totalAtividades = TOTAL_ATIVIDADES_ESPERADAS
+          const pontuacaoMaximaPossivel = totalAtividades * 100 * Math.max(totalAplicadores, 1)
+          const pontuacaoMinimaPossivel = totalAtividades * 25 * Math.max(totalAplicadores, 1)
+
+          let observacao = null
+          if (!todosAplicadoresPresentes) {
+            observacao = 'Avaliação incompleta: faltam avaliações de um ou mais aplicadores (são necessários Perito Médico e Assistente Social).'
+          } else if (!todasEspecialidadesCompletas) {
+            observacao = 'Avaliação incompleta: existem atividades sem preenchimento em uma ou mais especialidades.'
+          }
 
           return json({
             avaliado: { ...avaliadoParsed, avaliacoes: avaliacoesParsed, sessoes },
@@ -443,11 +479,11 @@ export default {
             pontuacaoTotal: pontuacaoTotalCombinada,
             pontuacaoMaxima: pontuacaoMaximaPossivel,
             pontuacaoMinima: pontuacaoMinimaPossivel,
-            classificacao: classificar(pontuacaoTotalCombinada),
+            classificacao: avaliacaoCompleta ? classificar(pontuacaoTotalCombinada) : null,
             totalAplicadores,
-            observacao: totalAplicadores < 2
-              ? 'Avaliação incompleta: faltam avaliações de um ou mais aplicadores'
-              : null
+            avaliacaoCompleta,
+            incompletudes,
+            observacao
           })
         }
       }
