@@ -192,7 +192,7 @@ tr:hover{background:#f5f5f5}
 
   <!-- NOVO AVALIADO -->
   <section id="novo" class="section">
-    <h3>Cadastro do Avaliado</h3>
+    <h3 id="form-cadastro-titulo">Cadastro do Avaliado</h3>
     <div id="alerta-novo"></div>
 
     <div class="accordion-header" onclick="toggleAccordion('acc-identificacao')">
@@ -346,7 +346,7 @@ tr:hover{background:#f5f5f5}
     </div>
 
     <div class="actions">
-      <button class="btn btn-primary" onclick="criarAvaliado()">Cadastrar Avaliado</button>
+      <button class="btn btn-primary" id="btn-salvar-avaliado" onclick="criarAvaliado()">Cadastrar Avaliado</button>
       <button class="btn btn-outline" onclick="limparFormNovo()">Limpar</button>
     </div>
   </section>
@@ -438,7 +438,8 @@ let state = {
   especialidade: null,
   avaliacoes: {},    // key: "DOM|atividade" → {pontuacao, barreiras, obs}
   dominiosData: [],
-  especialidadesData: []
+  especialidadesData: [],
+  avaliadoEmEdicao: null
 }
 
 // ─── Segurança XSS ────────────────────────────────────────────────────────
@@ -523,6 +524,71 @@ function limparFormNovo() {
     const el = document.getElementById(id); if(el) el.checked = false
   })
   document.getElementById('alerta-novo').innerHTML = ''
+  state.avaliadoEmEdicao = null
+  const btnSalvar = document.getElementById('btn-salvar-avaliado')
+  if (btnSalvar) btnSalvar.textContent = 'Cadastrar Avaliado'
+  const titulo = document.getElementById('form-cadastro-titulo')
+  if (titulo) titulo.textContent = 'Cadastro do Avaliado'
+}
+
+async function editarAvaliado(id) {
+  try {
+    const avaliado = await fetch(`/api/avaliados/${id}`).then(r => r.json())
+    if (!avaliado || avaliado.error) throw new Error(avaliado?.error || 'Avaliado não encontrado')
+
+    state.avaliadoEmEdicao = id
+    const btnSalvar = document.getElementById('btn-salvar-avaliado')
+    if (btnSalvar) btnSalvar.textContent = 'Salvar Alterações'
+    const titulo = document.getElementById('form-cadastro-titulo')
+    if (titulo) titulo.textContent = 'Editar Avaliado'
+
+    const fieldMap = {
+      'n-nome': avaliado.nome || '',
+      'n-nis': avaliado.nis_nit || '',
+      'n-idade': avaliado.idade || '',
+      'n-cid-causa': avaliado.cid_causa || '',
+      'n-cid-sequela': avaliado.cid_sequela || '',
+      'n-data-inicio': avaliado.data_inicio_impedimento || '',
+      'n-data-alt': avaliado.data_alteracao_impedimento || '',
+      'n-funcoes': avaliado.funcoes_corporais || '',
+      'n-historia-clinica': avaliado.historia_clinica || '',
+      'n-historia-social': avaliado.historia_social || '',
+      'n-data-aval': avaliado.data_avaliacao || '',
+      'n-aps': avaliado.codigo_aps || '',
+      'n-local': avaliado.local_avaliacao || ''
+    }
+    for (const [id, val] of Object.entries(fieldMap)) {
+      const el = document.getElementById(id)
+      if (el) el.value = val
+    }
+
+    const sexoEl = document.getElementById('n-sexo'); if(sexoEl) sexoEl.value = avaliado.sexo || ''
+    const corEl = document.getElementById('n-cor'); if(corEl) corEl.value = avaliado.cor_raca || ''
+    const semDiagEl = document.getElementById('n-sem-diag'); if(semDiagEl) semDiagEl.checked = avaliado.sem_diagnostico_etiologico || false
+
+    const fuzzySurdez = document.getElementById('n-fuzzy-surdez'); if(fuzzySurdez) fuzzySurdez.checked = avaliado.fuzzy_surdez_antes_6anos || false
+    const fuzzySozinho = document.getElementById('n-fuzzy-sozinho'); if(fuzzySozinho) fuzzySozinho.checked = avaliado.fuzzy_nao_pode_sozinho || false
+    const fuzzyCadeira = document.getElementById('n-fuzzy-cadeira'); if(fuzzyCadeira) fuzzyCadeira.checked = avaliado.fuzzy_cadeira_rodas || false
+    const fuzzyCego = document.getElementById('n-fuzzy-cego'); if(fuzzyCego) fuzzyCego.checked = avaliado.fuzzy_cego_ao_nascer || false
+
+    const tipoCbs = document.querySelectorAll('.tipo-cb')
+    if (tipoCbs && tipoCbs.length > 0) {
+      tipoCbs.forEach(cb => {
+        cb.checked = avaliado.tipo_impedimento ? avaliado.tipo_impedimento.includes(cb.value) : false
+      })
+    }
+    const checkboxItems = document.querySelectorAll('.checkbox-item')
+    if (checkboxItems && checkboxItems.length > 0) {
+      checkboxItems.forEach(li => {
+        const input = li.querySelector('input')
+        if(input) li.classList.toggle('checked', input.checked)
+      })
+    }
+
+    showSection('novo')
+  } catch (e) {
+    showAlerta('alerta-avaliar', e.message, 'error')
+  }
 }
 
 async function criarAvaliado() {
@@ -558,14 +624,26 @@ async function criarAvaliado() {
   }
 
   try {
-    const res = await fetch('/api/avaliados', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    const result = await res.json()
-    if (!res.ok) throw new Error(result.error || 'Erro ao cadastrar')
-    showAlerta('alerta-novo', `Avaliado "${nome}" cadastrado com sucesso!`)
+    let res, result
+    if (state.avaliadoEmEdicao) {
+      res = await fetch(`/api/avaliados/${state.avaliadoEmEdicao}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Erro ao atualizar')
+      showAlerta('alerta-novo', `Avaliado "${nome}" atualizado com sucesso!`)
+    } else {
+      res = await fetch('/api/avaliados', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Erro ao cadastrar')
+      showAlerta('alerta-novo', `Avaliado "${nome}" cadastrado com sucesso!`)
+    }
     limparFormNovo()
   } catch (e) {
     showAlerta('alerta-novo', e.message, 'error')
@@ -601,6 +679,7 @@ function renderListaAvaliados(avaliados) {
       <td>${a.idade || '—'}</td>
       <td>${tipos}</td>
       <td style="white-space:nowrap">
+        <button class="btn btn-secondary btn-sm" onclick="editarAvaliado(${a.id})" title="Editar" style="padding:6px 10px; margin-right: 4px;">✏️</button>
         <button class="btn btn-primary btn-sm" onclick="iniciarAvaliacaoFlow(${a.id},'${esc(a.nome)}')">Avaliar</button>
         <button class="btn btn-secondary btn-sm" onclick="verResultado(${a.id})">Resultado</button>
         <button class="btn btn-danger btn-sm" onclick="excluirAvaliado(${a.id},'${esc(a.nome)}')">Excluir</button>
