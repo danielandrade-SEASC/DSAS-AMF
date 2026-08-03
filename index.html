@@ -533,7 +533,12 @@ function limparFormNovo() {
 
 async function editarAvaliado(id) {
   try {
-    const avaliado = await fetch(`/api/avaliados/${id}`).then(r => r.json())
+    const res = await fetch(`/api/avaliados/${id}`)
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}))
+      throw new Error(errData.error || `Erro ${res.status} ao buscar avaliado`)
+    }
+    const avaliado = await res.json()
     if (!avaliado || avaliado.error) throw new Error(avaliado?.error || 'Avaliado não encontrado')
 
     state.avaliadoEmEdicao = id
@@ -557,33 +562,41 @@ async function editarAvaliado(id) {
       'n-aps': avaliado.codigo_aps || '',
       'n-local': avaliado.local_avaliacao || ''
     }
-    for (const [id, val] of Object.entries(fieldMap)) {
-      const el = document.getElementById(id)
+    for (const [fid, val] of Object.entries(fieldMap)) {
+      const el = document.getElementById(fid)
       if (el) el.value = val
     }
 
     const sexoEl = document.getElementById('n-sexo'); if(sexoEl) sexoEl.value = avaliado.sexo || ''
     const corEl = document.getElementById('n-cor'); if(corEl) corEl.value = avaliado.cor_raca || ''
-    const semDiagEl = document.getElementById('n-sem-diag'); if(semDiagEl) semDiagEl.checked = avaliado.sem_diagnostico_etiologico || false
+    const semDiagEl = document.getElementById('n-sem-diag'); if(semDiagEl) semDiagEl.checked = !!avaliado.sem_diagnostico_etiologico
 
-    const fuzzySurdez = document.getElementById('n-fuzzy-surdez'); if(fuzzySurdez) fuzzySurdez.checked = avaliado.fuzzy_surdez_antes_6anos || false
-    const fuzzySozinho = document.getElementById('n-fuzzy-sozinho'); if(fuzzySozinho) fuzzySozinho.checked = avaliado.fuzzy_nao_pode_sozinho || false
-    const fuzzyCadeira = document.getElementById('n-fuzzy-cadeira'); if(fuzzyCadeira) fuzzyCadeira.checked = avaliado.fuzzy_cadeira_rodas || false
-    const fuzzyCego = document.getElementById('n-fuzzy-cego'); if(fuzzyCego) fuzzyCego.checked = avaliado.fuzzy_cego_ao_nascer || false
+    const fuzzySurdez = document.getElementById('n-fuzzy-surdez'); if(fuzzySurdez) fuzzySurdez.checked = !!avaliado.fuzzy_surdez_antes_6anos
+    const fuzzySozinho = document.getElementById('n-fuzzy-sozinho'); if(fuzzySozinho) fuzzySozinho.checked = !!avaliado.fuzzy_nao_pode_sozinho
+    const fuzzyCadeira = document.getElementById('n-fuzzy-cadeira'); if(fuzzyCadeira) fuzzyCadeira.checked = !!avaliado.fuzzy_cadeira_rodas
+    const fuzzyCego = document.getElementById('n-fuzzy-cego'); if(fuzzyCego) fuzzyCego.checked = !!avaliado.fuzzy_cego_ao_nascer
 
     const tipoCbs = document.querySelectorAll('.tipo-cb')
     if (tipoCbs && tipoCbs.length > 0) {
       tipoCbs.forEach(cb => {
-        cb.checked = avaliado.tipo_impedimento ? avaliado.tipo_impedimento.includes(cb.value) : false
+        cb.checked = !!(avaliado.tipo_impedimento && avaliado.tipo_impedimento.includes(cb.value))
       })
     }
     const checkboxItems = document.querySelectorAll('.checkbox-item')
     if (checkboxItems && checkboxItems.length > 0) {
       checkboxItems.forEach(li => {
         const input = li.querySelector('input')
-        if(input) li.classList.toggle('checked', input.checked)
+        if(input) li.classList.toggle('checked', !!input.checked)
       })
     }
+
+    const accordions = ['acc-identificacao', 'acc-medico', 'acc-social', 'acc-avaliacao', 'acc-fuzzy']
+    accordions.forEach(aid => {
+      const body = document.getElementById(aid)
+      const icon = document.getElementById(aid + '-icon')
+      if (body) body.style.display = 'block'
+      if (icon) icon.textContent = '▼'
+    })
 
     showSection('novo')
   } catch (e) {
