@@ -1398,6 +1398,7 @@ async function salvarAvaliacao() {
     if (!res.ok) throw new Error(result.error)
     showAlerta(`${result.total} avaliações salvas com sucesso!`)
     atualizarProgresso()
+    showSection('avaliar')
   } catch (e) {
     showAlerta(e.message, 'error')
   }
