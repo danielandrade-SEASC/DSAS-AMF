@@ -1455,6 +1455,22 @@ function renderResultado(data) {
   `
 
   // 2. Por especialidade
+  // Mapa para exibir quais domínios o Fuzzy afeta por tipo de impedimento
+  const fuzzyLabelsDominio = {
+    'Auditiva': 'Comunicação / Socialização',
+    'Intelectual/Cognitiva': 'Vida Doméstica / Socialização',
+    'Mental': 'Vida Doméstica / Socialização',
+    'Fisica/Motora': 'Mobilidade / Cuidados Pessoais',
+    'Visual': 'Mobilidade / Vida Doméstica'
+  }
+  // Verifica situações emblemáticas ativas
+  const tipFuzzy = (avaliado.tipo_impedimento || '').split(',').map(t => t.trim()).filter(Boolean)
+  const fuzzyAtivoDetalhes = []
+  if (tipFuzzy.includes('Auditiva') && avaliado.fuzzy_surdez_antes_6anos) fuzzyAtivoDetalhes.push('Auditiva (Surdez antes dos 6 anos)')
+  if ((tipFuzzy.includes('Intelectual/Cognitiva') || tipFuzzy.includes('Mental')) && avaliado.fuzzy_nao_pode_sozinho) fuzzyAtivoDetalhes.push('Intelectual/Cognitiva/Mental (Não pode ficar sozinho)')
+  if (tipFuzzy.includes('Fisica/Motora') && avaliado.fuzzy_cadeira_rodas) fuzzyAtivoDetalhes.push('Física/Motora (Cadeira de rodas)')
+  if (tipFuzzy.includes('Visual') && avaliado.fuzzy_cego_ao_nascer) fuzzyAtivoDetalhes.push('Visual (Cegueira ao nascer)')
+  const fuzzyGeral = fuzzyAtivoDetalhes.length > 0
   Object.entries(resultadoPorEspecialidade).forEach(([esp, res]) => {
     const dominiosHTML = Object.entries(res.porDominio || {}).map(([cod, d]) =>
       `<div class="dominio-item">
@@ -1462,10 +1478,16 @@ function renderResultado(data) {
         <span class="pontuacao">${d.pontuacao} / ${d.maximo}</span>
       </div>`
     ).join('')
+    const fuzzyBadge = res.fuzzyAplicado
+      ? `<span class="fuzzy-badge" title="Ajuste Fuzzy aplicado: menor nota do domínio atribuída a todas as atividades">✓ FUZZY APLICADO</span>`
+      : ''
 
     html += `
       <div class="especialidade-section">
-        <div class="section-title">${esc(esp)}</div>
+        <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <span>${esc(esp)}</span>
+          ${fuzzyBadge}
+        </div>
         <div class="especialidade-info">
           Avaliador: ${esc(res.nomeAvaliador)} | ${res.totalAtividades} atividades | Pontuação: <strong>${res.pontuacaoTotal} / ${res.pontuacaoMaxima}</strong>
         </div>
@@ -1475,6 +1497,30 @@ function renderResultado(data) {
       </div>
     `
   })
+
+  // 2a. Bloco Fuzzy (se houver situação emblemática ativa)
+  if (fuzzyGeral) {
+    html += `
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;padding:16px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:700;color:#f57f17;font-size:1.1em">⚙️ Modelo Linguístico FUZZY — Aplicado</div>
+        </div>
+        <div style="font-size:.95em;color:#5d4037">
+          <div style="margin-bottom:8px"><strong>Situações emblemáticas constatadas:</strong></div>
+          <ul style="margin:0 0 8px 20px;padding:0">
+            ${fuzzyAtivoDetalhes.map(d => `<li>${esc(d)}</li>`).join('')}
+          </ul>
+          <div style="margin-bottom:4px"><strong>Domínios ajustados por impedimento:</strong></div>
+          <ul style="margin:0 0 0 20px;padding:0">
+            ${tipFuzzy.map(t => `<li><strong>${esc(t)}:</strong> ${esc(fuzzyLabelsDominio[t] || '-')}</li>`).join('')}
+          </ul>
+          <div style="margin-top:10px;font-size:.9em;color:#6d4c41;background:#fff9c4;border-radius:6px;padding:8px;border:1px dashed #fdd835">
+            ℹ️ Regra: a menor nota atribuída em cada domínio prevalente foi aplicada a TODAS as atividades do respectivo domínio.
+          </div>
+        </div>
+      </div>
+    `
+  }
 
   // 3. Resultado Final
   const headerBg = classificacao === 'Leve' ? '#ff9800' : 
