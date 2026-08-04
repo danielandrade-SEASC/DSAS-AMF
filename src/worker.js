@@ -106,6 +106,7 @@ function aplicarFuzzy(avaliado, avaliacoes) {
 
   for (const tipo of tipos) {
     const codigos = fuzzyDominios[tipo] || []
+    if (codigos.length === 0) continue
 
     const emblematicoAtivo =
       (tipo === 'Auditiva' && avaliado.fuzzy_surdez_antes_6anos) ||
@@ -113,18 +114,33 @@ function aplicarFuzzy(avaliado, avaliacoes) {
       (tipo === 'Fisica/Motora' && avaliado.fuzzy_cadeira_rodas) ||
       (tipo === 'Visual' && avaliado.fuzzy_cego_ao_nascer)
 
+    // ── GATILHOS CALCULADOS GLOBALMENTE PARA O TIPO DE IMPEDIMENTO (2 domínios juntos) ──
+    // Conforme Quadro 2: se houver 25/50 EM QUALQUER UM dos domínios do impedimento,
+    // ou se houver um domínio com tudo 75, DISPARA o fuzzy EM AMBOS os domínios do tipo.
+    const pontuacoesTodosDominios = []
+    const resultadosPorDominioPre = {}
     for (const cod of codigos) {
-      const ativsNoDominio = resultado.filter(a => a.dominio === cod)
-      if (ativsNoDominio.length === 0) continue
+      const ativs = resultado.filter(a => a.dominio === cod)
+      const ps = ativs.map(a => a.pontuacao)
+      resultadosPorDominioPre[cod] = { atividades: ativs, pontuacoes: ps, min: Math.min(...ps, 100) }
+      ps.forEach(p => pontuacoesTodosDominios.push(p))
+    }
+    const tem25ou50 = pontuacoesTodosDominios.some(p => p <= 50)
+    const todos75EmAlgumDominio = Object.values(resultadosPorDominioPre).some(
+      r => r.pontuacoes.length > 0 && r.pontuacoes.every(p => p === 75)
+    )
+    const dispararFuzzy = emblematicoAtivo || tem25ou50 || todos75EmAlgumDominio
 
-      const pontuacoes = ativsNoDominio.map(a => a.pontuacao)
-      const minPontuacao = Math.min(...pontuacoes)
-      const tem25ou50 = pontuacoes.some(p => p <= 50)
-      const todos75 = pontuacoes.every(p => p === 75)
-
-      if (emblematicoAtivo || tem25ou50 || todos75) {
+    // ── APLICA em AMBOS os domínios do impedimento (se gatilho disparou) ──
+    // Cada domínio é reduzido para a SUA PRÓPRIA menor nota (conforme regra):
+    //  - ex. Física/Motora: MOB → min(MOB) = 50, CP → min(CP) = 75
+    if (dispararFuzzy) {
+      for (const cod of codigos) {
+        const info = resultadosPorDominioPre[cod]
+        if (!info || info.atividades.length === 0) continue
+        const minDoDominio = info.min
         resultado = resultado.map(a =>
-          a.dominio === cod ? { ...a, pontuacao: minPontuacao } : a
+          a.dominio === cod ? { ...a, pontuacao: minDoDominio } : a
         )
       }
     }
