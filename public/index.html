@@ -271,6 +271,8 @@ tr:hover{background:#f5f5f5}
   #resultados.section{display:block!important;box-shadow:none;padding:0}
   .dominio-body{display:block!important}
   .official-header{display:block!important}
+  .questoes-esp-block{page-break-inside:avoid;break-inside:avoid}
+  .atividade-item{page-break-inside:avoid;break-inside:avoid}
   @page {
     margin: 2cm;
   }
@@ -321,7 +323,6 @@ tr:hover{background:#f5f5f5}
 
   <nav class="nav-tabs">
     <button class="nav-tab active" onclick="showSection('home')">Início</button>
-    <button class="nav-tab" onclick="showSection('avaliados')">Avaliados Cadastrados</button>
     <button class="nav-tab" onclick="showSection('novo')">Novo Avaliado</button>
     <button class="nav-tab" onclick="showSection('avaliar')">Avaliar</button>
     <button class="nav-tab" onclick="showSection('resultados')">Resultados</button>
@@ -440,7 +441,7 @@ tr:hover{background:#f5f5f5}
           </label>
         </div>
         <div class="form-group">
-          <label>Tipo de Impedimento <small style="font-weight:400">(máx. 2)</small></label>
+          <label>Tipo de Impedimento <span style="color:#e53935">*</span> <small style="font-weight:400">(obrigatório, máx. 2)</small></label>
           <div class="checkbox-group" id="tipo-impedimento-group">
             <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Auditiva"> Auditiva</label>
             <label class="checkbox-item"><input type="checkbox" class="tipo-cb" value="Intelectual/Cognitiva"> Intelectual / Cognitiva / Mental</label>
@@ -534,7 +535,7 @@ tr:hover{background:#f5f5f5}
 
       <div class="actions">
         <button class="btn btn-primary" id="btn-salvar-avaliado" onclick="criarAvaliado()">Cadastrar Avaliado</button>
-        <button class="btn btn-outline" onclick="showSection('avaliados')">Cancelar</button>
+        <button class="btn btn-outline" onclick="showSection('avaliar')">Cancelar</button>
       </div>
   </section>
 
@@ -964,6 +965,8 @@ async function criarAvaliado() {
     if (tipoCbs && tipoCbs.length > 0) {
       tipos = [...tipoCbs].map(cb => cb.value).filter(v => v)
     }
+    if (tipos.length === 0) { showAlerta('Selecione pelo menos um Tipo de Impedimento', 'error'); return }
+    if (tipos.length > 2) { showAlerta('Selecione no máximo 2 Tipos de Impedimento', 'error'); return }
     console.log('tipos:', tipos)
     const idadeValEl = document.getElementById('n-idade')
     const idadeVal = idadeValEl ? idadeValEl.value : ''
@@ -1015,8 +1018,8 @@ async function criarAvaliado() {
     }
 
     limparFormNovo()
-    showSection('avaliados')
-    loadAvaliadosNovo()
+    showSection('avaliar')
+    loadAvaliados()
   } catch (e) {
     console.error('criarAvaliado error:', e)
     showAlerta(e.message, 'error')
@@ -1489,6 +1492,64 @@ function renderResultado(data) {
       </div>
     </div>
   `
+
+  // 1b. Questões e Respostas dos Avaliadores (todas as 41 atividades por aplicador)
+  const todasAvaliacoes = avaliado.avaliacoes || []
+  const scoreLabels = {
+    25:  'Não\nRealiza',
+    50:  'Com\nAuxílio',
+    75:  'Adaptado',
+    100: 'Independente'
+  }
+  const scoreClasses = { 25: 'p25', 50: 'p50', 75: 'p75', 100: 'p100' }
+
+  let questoesHtml = '<div class="questoes-respostas-section" style="margin-bottom:20px">'
+  questoesHtml += '<div class="section-title" style="margin-bottom:12px">Questões e Respostas dos Avaliadores</div>'
+
+  for (const esp of ['Perito Médico', 'Assistente Social']) {
+    const avaliacoesEsp = todasAvaliacoes.filter(a => a.especialidade === esp)
+    if (avaliacoesEsp.length === 0) continue
+    const sessao = (avaliado.sessoes || []).find(s => s.especialidade === esp)
+    const nomeAvaliador = sessao?.nome_avaliador || avaliacoesEsp[0].nome_avaliador || '—'
+    questoesHtml += `<div class="questoes-esp-block" style="margin-bottom:16px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden">`
+    questoesHtml += `<div style="background:linear-gradient(135deg,#1a237e,#4a148c);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">`
+    questoesHtml += `<strong>${esc(esp)}</strong><span style="font-size:.85em;opacity:.9">Avaliador: ${esc(nomeAvaliador)}</span>`
+    questoesHtml += `</div><div style="padding:12px 16px">`
+
+    const dominiosOficiais = state.dominiosData || []
+    for (const dominio of dominiosOficiais) {
+      questoesHtml += `<div style="margin-bottom:14px">`
+      questoesHtml += `<div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:6px;padding:8px 12px;font-weight:600;color:#1a237e;display:flex;justify-content:space-between;margin-bottom:8px">`
+      questoesHtml += `<span><strong>${esc(dominio.codigo)}</strong> — ${esc(dominio.nome)}</span>`
+      questoesHtml += `<span style="font-size:.8em;color:#666;font-weight:400">${dominio.atividades.length} atividades</span>`
+      questoesHtml += `</div>`
+
+      for (const atividade of dominio.atividades) {
+        const av = avaliacoesEsp.find(a => a.dominio === dominio.codigo && a.atividade === atividade)
+        const pontuacao = av ? av.pontuacao : null
+        const obs = av?.observacao || ''
+        questoesHtml += `<div class="atividade-item" style="background:#fff;border:1px solid #e8eaf6;border-radius:6px;padding:10px 12px;margin-bottom:8px">`
+        questoesHtml += `<div class="atividade-nome" style="font-weight:600;color:#1a237e;margin-bottom:8px;font-size:.9em">${esc(atividade)}</div>`
+        questoesHtml += `<div class="pontuacao-row" style="display:flex;gap:6px;flex-wrap:wrap">`
+        for (const v of [25, 50, 75, 100]) {
+          const selected = pontuacao === v
+          const cls = `pontuacao-btn ${scoreClasses[v]}${selected ? ' selected' : ''}`
+          const style = selected ? '' : 'opacity:.45'
+          questoesHtml += `<button type="button" class="${cls}" style="${style};cursor:default;padding:6px 12px;min-width:60px;font-size:.85em" disabled>${v}<span class="label" style="font-size:.65em;display:block;line-height:1.2;margin-top:1px">${scoreLabels[v].replace('\n',' ')}</span></button>`
+        }
+        questoesHtml += `</div>`
+        if (obs) {
+          questoesHtml += `<div style="margin-top:6px;font-size:.8em;color:#555;background:#f8f9fa;padding:6px 8px;border-radius:4px;border-left:3px solid #1a237e"><strong>Obs:</strong> ${esc(obs)}</div>`
+        }
+        questoesHtml += `</div>`
+      }
+      questoesHtml += `</div>`
+    }
+    questoesHtml += `</div></div>`
+  }
+  questoesHtml += '</div>'
+
+  html += questoesHtml
 
   // 2. Por especialidade
   // Mapa para exibir quais domínios o Fuzzy afeta por tipo de impedimento
