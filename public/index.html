@@ -261,6 +261,55 @@ tr:hover{background:#f5f5f5}
 .modal-btn:hover{
   background:#283593;
 }
+/* Login */
+body.logado #login-overlay{display:none!important}
+#app-container{display:none}
+body.logado #app-container{display:block}
+#login-overlay{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(135deg,#1a237e 0%,#4a148c 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:2000;
+}
+.login-card{
+  background:#fff;
+  padding:32px 28px;
+  border-radius:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.35);
+  width:100%;
+  max-width:400px;
+}
+.login-card h1{color:#1a237e;font-size:1.8em;text-align:center;margin-bottom:2px}
+.login-card .login-sub{color:#4a148c;font-size:.95em;text-align:center;font-weight:400}
+.login-card .login-inst{color:#888;font-size:.8em;text-align:center;margin-bottom:20px}
+.login-erro{color:#c62828;font-size:.85em;min-height:18px;margin-bottom:10px}
+.login-btn{width:100%;margin-top:4px}
+/* Barra do usuário */
+.user-bar{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:12px;
+  background:#fff;
+  padding:8px 16px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+  margin-bottom:12px;
+  font-size:.9em;
+  color:#333;
+}
+.user-bar .user-nome{font-weight:600;color:#1a237e}
+.user-bar .user-perfil{font-size:.8em;color:#666}
+/* Usuários */
+.perfil-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.8em;font-weight:600}
+.perfil-admin{background:#e8eaf6;color:#1a237e;border:1px solid #9fa8da}
+.perfil-operador{background:#eceff1;color:#546e7a;border:1px solid #b0bec5}
+.status-ativo{color:#1b5e20;font-weight:600}
+.status-inativo{color:#c62828;font-weight:600}
 /* Print */
 @media print{
   body{background:#fff;padding:0;margin:0}
@@ -309,7 +358,28 @@ tr:hover{background:#f5f5f5}
 </style>
 </head>
 <body>
-<div class="container">
+<!-- LOGIN -->
+<div id="login-overlay">
+  <div class="login-card">
+    <h1>IF-BrA</h1>
+    <div class="login-sub">Instrumento de Funcionalidade Brasileiro</div>
+    <div class="login-inst">Diretoria de Saúde do Servidor — Santa Catarina</div>
+    <form id="login-form" onsubmit="fazerLogin(event)">
+      <div class="form-group">
+        <label>Usuário</label>
+        <input type="text" id="login-username" autocomplete="username" autofocus>
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-senha" autocomplete="current-password">
+      </div>
+      <div id="login-erro" class="login-erro"></div>
+      <button type="submit" class="btn btn-primary login-btn">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div class="container" id="app-container">
   <div class="official-header" id="print-header">
     <h1>ESTADO DE SANTA CATARINA</h1>
     <h2>SECRETARIA DE ESTADO DA ADMINISTRAÇÃO</h2>
@@ -321,11 +391,17 @@ tr:hover{background:#f5f5f5}
     <!-- <p>Lei Complementar nº 142/2013 — INSS — Perícia Médica e Serviço Social</p> -->
   </header>
 
+  <div class="user-bar no-print">
+    <span id="user-info"></span>
+    <button class="btn btn-outline btn-sm" onclick="fazerLogout()">Sair</button>
+  </div>
+
   <nav class="nav-tabs">
     <button class="nav-tab active" onclick="showSection('home')">Início</button>
     <button class="nav-tab" onclick="showSection('novo')">Novo Avaliado</button>
     <button class="nav-tab" onclick="showSection('avaliar')">Avaliar</button>
     <button class="nav-tab" onclick="showSection('resultados')">Resultados</button>
+    <button class="nav-tab" id="nav-tab-usuarios" style="display:none" onclick="showSection('usuarios')">Usuários</button>
   </nav>
 
   <!-- HOME -->
@@ -650,6 +726,52 @@ tr:hover{background:#f5f5f5}
     </div>
   </section>
 
+  <!-- USUÁRIOS -->
+  <section id="usuarios" class="section">
+    <h3>Gestão de Usuários</h3>
+    <div id="alerta-usuario"></div>
+
+    <div class="card">
+      <h4 id="usuario-form-titulo" style="color:#1a237e;margin-bottom:12px">Novo Usuário</h4>
+      <input type="hidden" id="u-id">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Login <span class="req">*</span></label>
+          <input type="text" id="u-username" placeholder="ex: joao.silva">
+        </div>
+        <div class="form-group">
+          <label>Nome <span class="req">*</span></label>
+          <input type="text" id="u-nome" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label>Perfil <span class="req">*</span></label>
+          <select id="u-perfil">
+            <option value="operador">Operador</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Senha <span class="req">*</span></label>
+          <input type="password" id="u-senha" autocomplete="new-password" placeholder="Mínimo 4 caracteres">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="checkbox-item" style="display:inline-flex;width:auto">
+          <input type="checkbox" id="u-ativo" checked> Usuário ativo
+        </label>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="salvarUsuario()">Salvar Usuário</button>
+        <button class="btn btn-outline" onclick="limparFormUsuario()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:#1a237e;margin-bottom:12px">Usuários Cadastrados</h4>
+      <div id="lista-usuarios"></div>
+    </div>
+  </section>
+
   <!-- MODAL -->
   <div id="modal-overlay" class="modal-overlay" style="display:none;">
     <div class="modal">
@@ -672,7 +794,8 @@ let state = {
   dominiosData: [],
   especialidadesData: [],
   avaliadosData: [],  // Lista completa de avaliados para filtro
-  avaliadoEmEdicao: null // ID do avaliado sendo editado
+  avaliadoEmEdicao: null, // ID do avaliado sendo editado
+  usuariosData: []     // Lista de usuários para a tela de gestão
 }
 
 // ─── Segurança XSS ────────────────────────────────────────────────────────
@@ -691,6 +814,21 @@ function showAlerta(msg, tipo = 'success') {
   
   header.textContent = tipo === 'success' ? 'Sucesso' : tipo === 'error' ? 'Erro' : 'Aviso'
   body.textContent = msg
+  overlay.querySelector('.modal-footer').innerHTML = '<button class="modal-btn" onclick="fecharModal()">OK</button>'
+  overlay.style.display = 'flex'
+}
+
+function showConfirm(msg, onOk) {
+  const overlay = document.getElementById('modal-overlay')
+  const header = document.getElementById('modal-header')
+  const body = document.getElementById('modal-body')
+  if (!overlay || !header || !body) return
+  header.textContent = 'Confirmação'
+  body.textContent = msg
+  const footer = overlay.querySelector('.modal-footer')
+  footer.innerHTML = '<button class="modal-btn" style="background:#9e9e9e" onclick="fecharModal()">Cancelar</button>' +
+    '<button class="modal-btn" id="modal-confirm-btn" style="background:#c62828;margin-left:8px">Confirmar</button>'
+  document.getElementById('modal-confirm-btn').onclick = () => { fecharModal(); onOk() }
   overlay.style.display = 'flex'
 }
 
@@ -715,6 +853,7 @@ function showSection(id, opts = {}) {
   if (navTab) navTab.classList.add('active')
   if (id === 'avaliar') loadAvaliados()
   if (id === 'avaliados') loadAvaliadosNovo()
+  if (id === 'usuarios') carregarUsuarios()
   if (id === 'novo' && !opts.skipLimpar) limparFormNovo()
 }
 
@@ -731,6 +870,182 @@ function classificacaoCss(cls) {
   return m[cls] || 'insuficiente'
 }
 
+// ─── Autenticação ─────────────────────────────────────────────────────────
+function getUsuario() {
+  try { return JSON.parse(sessionStorage.getItem('ifbra_usuario')) } catch { return null }
+}
+
+async function fazerLogin(e) {
+  if (e) e.preventDefault()
+  const username = document.getElementById('login-username').value.trim()
+  const senha = document.getElementById('login-senha').value
+  const errEl = document.getElementById('login-erro')
+  errEl.textContent = ''
+  if (!username || !senha) { errEl.textContent = 'Informe usuário e senha.'; return }
+
+  const btn = document.querySelector('#login-form button[type=submit]')
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando...' }
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, senha })
+    })
+    const data = await r.json().catch(() => ({}))
+    if (!r.ok) { errEl.textContent = data.error || 'Falha ao entrar.'; return }
+    sessionStorage.setItem('ifbra_usuario', JSON.stringify(data.usuario))
+    entrarNoApp(data.usuario)
+  } catch {
+    errEl.textContent = 'Erro de conexão. Tente novamente.'
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Entrar' }
+  }
+}
+
+function entrarNoApp(u) {
+  document.body.classList.add('logado')
+  aplicarPermissoes(u)
+  document.getElementById('login-senha').value = ''
+  document.getElementById('login-erro').textContent = ''
+  showSection('home')
+}
+
+function fazerLogout() {
+  sessionStorage.removeItem('ifbra_usuario')
+  document.body.classList.remove('logado')
+  document.getElementById('login-username').value = ''
+  document.getElementById('login-senha').value = ''
+  document.getElementById('login-erro').textContent = ''
+  document.getElementById('login-username').focus()
+}
+
+function aplicarPermissoes(u) {
+  const isAdmin = u.perfil === 'admin'
+  const tabUsuarios = document.getElementById('nav-tab-usuarios')
+  if (tabUsuarios) tabUsuarios.style.display = isAdmin ? '' : 'none'
+  const info = document.getElementById('user-info')
+  if (info) {
+    info.innerHTML = `<span class="user-nome">${esc(u.nome)}</span> <span class="user-perfil">— ${isAdmin ? 'Administrador' : 'Operador'} (${esc(u.username)})</span>`
+  }
+}
+
+// ─── Gestão de Usuários ───────────────────────────────────────────────────
+async function carregarUsuarios() {
+  const u = getUsuario()
+  if (!u || u.perfil !== 'admin') return
+  const container = document.getElementById('lista-usuarios')
+  try {
+    const lista = await fetch('/api/usuarios').then(r => r.json())
+    state.usuariosData = Array.isArray(lista) ? lista : []
+  } catch {
+    state.usuariosData = []
+  }
+  if (state.usuariosData.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>Nenhum usuário cadastrado.</p></div>'
+    return
+  }
+  const linhas = state.usuariosData.map(x => `
+    <tr>
+      <td>${esc(x.username)}</td>
+      <td>${esc(x.nome)}</td>
+      <td><span class="perfil-badge ${x.perfil === 'admin' ? 'perfil-admin' : 'perfil-operador'}">${x.perfil === 'admin' ? 'Administrador' : 'Operador'}</span></td>
+      <td><span class="${x.ativo ? 'status-ativo' : 'status-inativo'}">${x.ativo ? 'Ativo' : 'Inativo'}</span></td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editarUsuario(${x.id})">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirUsuario(${x.id})">Excluir</button>
+      </td>
+    </tr>
+  `).join('')
+  container.innerHTML = `
+    <table>
+      <thead><tr><th>Login</th><th>Nome</th><th>Perfil</th><th>Situação</th><th>Ações</th></tr></thead>
+      <tbody>${linhas}</tbody>
+    </table>
+  `
+}
+
+function limparFormUsuario() {
+  document.getElementById('u-id').value = ''
+  document.getElementById('u-username').value = ''
+  document.getElementById('u-username').disabled = false
+  document.getElementById('u-nome').value = ''
+  document.getElementById('u-perfil').value = 'operador'
+  document.getElementById('u-senha').value = ''
+  document.getElementById('u-senha').placeholder = 'Mínimo 4 caracteres'
+  document.getElementById('u-ativo').checked = true
+  document.getElementById('usuario-form-titulo').textContent = 'Novo Usuário'
+}
+
+function editarUsuario(id) {
+  const u = (state.usuariosData || []).find(x => x.id === id)
+  if (!u) return
+  document.getElementById('u-id').value = u.id
+  document.getElementById('u-username').value = u.username
+  document.getElementById('u-username').disabled = true
+  document.getElementById('u-nome').value = u.nome
+  document.getElementById('u-perfil').value = u.perfil
+  document.getElementById('u-senha').value = ''
+  document.getElementById('u-senha').placeholder = 'Deixe em branco para manter a senha atual'
+  document.getElementById('u-ativo').checked = !!u.ativo
+  document.getElementById('usuario-form-titulo').textContent = 'Editar Usuário'
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+async function salvarUsuario() {
+  const id = document.getElementById('u-id').value
+  const username = document.getElementById('u-username').value.trim()
+  const nome = document.getElementById('u-nome').value.trim()
+  const perfil = document.getElementById('u-perfil').value
+  const senha = document.getElementById('u-senha').value
+  const ativo = document.getElementById('u-ativo').checked
+
+  if (!nome) { showAlerta('Informe o nome do usuário.', 'error'); return }
+  if (!id && !username) { showAlerta('Informe o login do usuário.', 'error'); return }
+  if (!id && !senha) { showAlerta('Informe a senha do usuário.', 'error'); return }
+  if (senha && senha.length < 4) { showAlerta('A senha deve ter ao menos 4 caracteres.', 'error'); return }
+
+  try {
+    let r
+    if (id) {
+      r = await fetch(`/api/usuarios/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, perfil, ativo, senha: senha || undefined })
+      })
+    } else {
+      r = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, nome, perfil, senha })
+      })
+    }
+    const data = await r.json().catch(() => ({}))
+    if (!r.ok) { showAlerta(data.error || 'Erro ao salvar usuário.', 'error'); return }
+    showAlerta(data.message || 'Usuário salvo com sucesso.')
+    limparFormUsuario()
+    carregarUsuarios()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } catch {
+    showAlerta('Erro de conexão ao salvar usuário.', 'error')
+  }
+}
+
+function excluirUsuario(id) {
+  const u = (state.usuariosData || []).find(x => x.id === id)
+  const nome = u ? u.nome : 'este usuário'
+  showConfirm(`Deseja realmente excluir o usuário "${nome}"?`, async () => {
+    try {
+      const r = await fetch(`/api/usuarios/${id}`, { method: 'DELETE' })
+      const data = await r.json().catch(() => ({}))
+      if (!r.ok) { showAlerta(data.error || 'Erro ao excluir usuário.', 'error'); return }
+      showAlerta(data.message || 'Usuário removido com sucesso.')
+      carregarUsuarios()
+    } catch {
+      showAlerta('Erro de conexão ao excluir usuário.', 'error')
+    }
+  })
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────
 async function init() {
   const [dominios, especialidades] = await Promise.all([
@@ -740,6 +1055,15 @@ async function init() {
   state.dominiosData = dominios
   state.especialidadesData = especialidades
   renderHomeDominios()
+
+  // Retoma a sessão, se houver
+  const u = getUsuario()
+  if (u) {
+    entrarNoApp(u)
+  } else {
+    const inp = document.getElementById('login-username')
+    if (inp) inp.focus()
+  }
 }
 
 function renderHomeDominios() {

@@ -194,6 +194,45 @@ function parseBools(row) {
   }
 }
 
+// ─── Autenticação / Usuários ──────────────────────────────────────────────────
+
+// Usuários iniciais (senhas já em SHA-256): admin / D@n1el  |  operador / 0per@do$
+const USUARIOS_SEED = [
+  { username: 'admin',    nome: 'Administrador', perfil: 'admin',    hash: '89892a8fa727049e6a2ff26a1f9696c83c603570664ef928539b16df43c353a2' },
+  { username: 'operador', nome: 'Operador',      perfil: 'operador', hash: 'deb669c576a29900174385ff19768ee3ee9a76bb24fb4a0b6623138be70329ae' }
+]
+
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// Garante (uma única vez por isolate) que a tabela de usuários exista e esteja semeada
+let usuariosProntos = null
+function ensureUsuarios(db) {
+  if (!usuariosProntos) {
+    usuariosProntos = (async () => {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS usuarios (
+          id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          username   TEXT NOT NULL UNIQUE,
+          nome       TEXT NOT NULL,
+          senha_hash TEXT NOT NULL,
+          perfil     TEXT NOT NULL DEFAULT 'operador',
+          ativo      INTEGER NOT NULL DEFAULT 1,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run()
+      for (const u of USUARIOS_SEED) {
+        await db.prepare(
+          'INSERT OR IGNORE INTO usuarios (username, nome, senha_hash, perfil, ativo) VALUES (?, ?, ?, ?, 1)'
+        ).bind(u.username, u.nome, u.hash, u.perfil).run()
+      }
+    })().catch(err => { usuariosProntos = null; throw err })
+  }
+  return usuariosProntos
+}
+
 // ─── Worker ───────────────────────────────────────────────────────────────────
 
 export default {
@@ -219,6 +258,91 @@ export default {
     const db = env.DB
 
     try {
+      // ── Autenticação ─────────────────────────────────────────────────────
+      if (method === 'POST' && path === '/api/login') {
+        await ensureUsuarios(db)
+        const b = await request.json().catch(() => ({}))
+        const username = String(b.username || '').trim().toLowerCase()
+        const senha = String(b.senha || '')
+        if (!username || !senha) return json({ error: 'Informe usuário e senha' }, 400)
+
+        const u = await db.prepare('SELECT * FROM usuarios WHERE lower(username) = ?').bind(username).first()
+        if (!u) return json({ error: 'Usuário ou senha inválidos' }, 401)
+        if (!u.ativo) return json({ error: 'Usuário inativo. Contate o administrador.' }, 403)
+
+        const hash = await sha256Hex(senha)
+        if (hash !== u.senha_hash) return json({ error: 'Usuário ou senha inválidos' }, 401)
+
+        return json({ usuario: { id: u.id, username: u.username, nome: u.nome, perfil: u.perfil } })
+      }
+
+      // ── Usuários (gestão) ────────────────────────────────────────────────
+      if (method === 'GET' && path === '/api/usuarios') {
+        await ensureUsuarios(db)
+        const { results } = await db.prepare(
+          'SELECT id, username, nome, perfil, ativo, created_at FROM usuarios ORDER BY username ASC'
+        ).all()
+        return json(results.map(u => ({ ...u, ativo: !!u.ativo })))
+      }
+
+      if (method === 'POST' && path === '/api/usuarios') {
+        await ensureUsuarios(db)
+        const b = await request.json().catch(() => ({}))
+        const username = String(b.username || '').trim().toLowerCase()
+        const nome = String(b.nome || '').trim()
+        const perfil = b.perfil === 'admin' ? 'admin' : 'operador'
+        const senha = String(b.senha || '')
+
+        if (!username || !nome || !senha) return json({ error: 'Login, nome e senha são obrigatórios' }, 400)
+        if (senha.length < 4) return json({ error: 'A senha deve ter ao menos 4 caracteres' }, 400)
+
+        const existe = await db.prepare('SELECT id FROM usuarios WHERE lower(username) = ?').bind(username).first()
+        if (existe) return json({ error: 'Já existe um usuário com esse login' }, 409)
+
+        const hash = await sha256Hex(senha)
+        const r = await db.prepare(
+          'INSERT INTO usuarios (username, nome, senha_hash, perfil, ativo) VALUES (?, ?, ?, ?, 1)'
+        ).bind(username, nome, hash, perfil).run()
+        return json({ id: r.meta.last_row_id, message: 'Usuário criado com sucesso' })
+      }
+
+      const matchUsuario = path.match(/^\/api\/usuarios\/(\d+)$/)
+      if (matchUsuario) {
+        await ensureUsuarios(db)
+        const uid = parseInt(matchUsuario[1])
+        const u = await db.prepare('SELECT * FROM usuarios WHERE id = ?').bind(uid).first()
+        if (!u) return json({ error: 'Usuário não encontrado' }, 404)
+
+        if (method === 'PATCH') {
+          const b = await request.json().catch(() => ({}))
+          const sets = []
+          const vals = []
+          if (b.nome !== undefined) { sets.push('nome = ?'); vals.push(String(b.nome).trim()) }
+          if (b.perfil !== undefined) { sets.push('perfil = ?'); vals.push(b.perfil === 'admin' ? 'admin' : 'operador') }
+          if (b.ativo !== undefined) { sets.push('ativo = ?'); vals.push(b.ativo ? 1 : 0) }
+          if (b.senha) {
+            if (String(b.senha).length < 4) return json({ error: 'A senha deve ter ao menos 4 caracteres' }, 400)
+            sets.push('senha_hash = ?'); vals.push(await sha256Hex(String(b.senha)))
+          }
+          if (sets.length === 0) return json({ error: 'Nenhum campo para atualizar' }, 400)
+
+          vals.push(uid)
+          await db.prepare(`UPDATE usuarios SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run()
+          return json({ message: 'Usuário atualizado com sucesso' })
+        }
+
+        if (method === 'DELETE') {
+          if (u.perfil === 'admin' && u.ativo) {
+            const admins = await db.prepare(
+              "SELECT COUNT(*) as c FROM usuarios WHERE perfil = 'admin' AND ativo = 1"
+            ).first()
+            if (admins.c <= 1) return json({ error: 'Não é possível excluir o último administrador ativo' }, 400)
+          }
+          await db.prepare('DELETE FROM usuarios WHERE id = ?').bind(uid).run()
+          return json({ message: 'Usuário removido com sucesso' })
+        }
+      }
+
       // ── Metadados ────────────────────────────────────────────────────────
       if (method === 'GET' && path === '/api/dominios') return json(dominios)
       if (method === 'GET' && path === '/api/especialidades') return json(especialidades)

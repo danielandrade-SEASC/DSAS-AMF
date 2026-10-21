@@ -61,3 +61,20 @@ CREATE TABLE "avaliacoes" (
 
 CREATE INDEX IF NOT EXISTS "avaliacoes_avaliado_id_idx" ON "avaliacoes"("avaliado_id");
 CREATE INDEX IF NOT EXISTS "sessoes_avaliado_id_idx" ON "avaliacao_sessoes"("avaliado_id");
+
+-- ─── Usuários (autenticação) ──────────────────────────────────────────────────
+-- Mantida fora do DROP acima para preservar usuários já cadastrados.
+CREATE TABLE IF NOT EXISTS "usuarios" (
+    "id"         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "username"   TEXT NOT NULL UNIQUE,
+    "nome"       TEXT NOT NULL,
+    "senha_hash" TEXT NOT NULL,
+    "perfil"     TEXT NOT NULL DEFAULT 'operador',
+    "ativo"      INTEGER NOT NULL DEFAULT 1,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Senhas em SHA-256: admin / D@n1el  |  operador / 0per@do$
+INSERT OR IGNORE INTO "usuarios" ("username", "nome", "senha_hash", "perfil", "ativo") VALUES
+  ('admin',    'Administrador', '89892a8fa727049e6a2ff26a1f9696c83c603570664ef928539b16df43c353a2', 'admin',    1),
+  ('operador', 'Operador',      'deb669c576a29900174385ff19768ee3ee9a76bb24fb4a0b6623138be70329ae', 'operador', 1);
